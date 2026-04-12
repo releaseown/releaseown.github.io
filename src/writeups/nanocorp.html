@@ -565,11 +565,16 @@ Service Info: OS: Windows</pre>
 
       <!-- Actor image block -->
       <div class="actor-block">
-        <img src="/imgs/threatactor.png" alt="Possible actor who shared the CVE-2025-24071 0day exploit"
+        <!--
+          INSTRUÇÃO: Substitua o atributo src abaixo pelo caminho ou URL da sua imagem.
+          Exemplo local:  src="../images/actor.png"
+          Exemplo URL:    src="https://example.com/actor.jpg"
+        -->
+        <img src="imgs/threatactor.png" alt="Possible actor who shared the CVE-2025-24071 0day exploit"
           onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
         <div class="actor-placeholder" style="display:none">
           <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7f1c14" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 9h18M9 21V9"/></svg>
-          <span>// Adicione aqui: src="../images/actor.png"</span>
+          <span>// imgs/threatactor.png</span>
         </div>
         <p class="actor-caption">&#9632; Possible actor who shared the CVE-2025-24071 0day</p>
       </div>
@@ -703,8 +708,8 @@ $ <span class="kw">bloodyAD --host dc01.nanocorp.htb -d nanocorp.htb \
 $ <span class="kw">export KRB5CCNAME=monitoring_svc.ccache</span>
 
 $ <span class="kw">python3 winrmexec.py -ssl -port 5986 -k \
-    nanocorp.htb/monitoring_svc@dc01.nanocorp.htb -no-pass</span>
-<span class="ok">[*] requesting TGS for HTTP/dc01.nanocorp.htb@NANOCORP.HTB</span>
+    nanocorp.htb/<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="274a48494e5348554e4940785451446743441716094946494844485557094f5345">[email&#160;protected]</a> -no-pass</span>
+<span class="ok">[*] requesting TGS for HTTP/<a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="81e5e2b1b0afefe0efeee2eef3f1afe9f5e3c1cfc0cfcec2ced3d1afc9d5c3">[email&#160;protected]</a></span>
 <span class="ok">PS C:\Users\monitoring_svc\Documents&gt;</span></pre>
       </div>
 
@@ -859,7 +864,7 @@ C:\Users\Administrator\Desktop&gt; <span class="kw">type root.txt</span></pre>
     </p>
   </footer>
 
-  <script>
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
     document.getElementById('yr').textContent = new Date().getFullYear();
 
     /* ── Copy button ── */
@@ -878,17 +883,4 @@ C:\Users\Administrator\Desktop&gt; <span class="kw">type root.txt</span></pre>
         if (e.isIntersecting) {
           e.target.style.opacity = '1';
           e.target.style.transform = 'translateY(0)';
-          obs.unobserve(e.target);
-        }
-      });
-    }, { threshold: .08 });
-
-    document.querySelectorAll('.ws, .code-block, .callout, .creds-box, .flag-box, .takeaway').forEach(el => {
-      el.style.opacity = '0';
-      el.style.transform = 'translateY(20px)';
-      el.style.transition = 'opacity .5s ease, transform .5s ease';
-      obs.observe(el);
-    });
-  </script>
-</body>
-</html>
+          obs.unobserv
