@@ -21,7 +21,7 @@
       --text-dim:    #666;
       --text-muted:  #333;
       --border:      #1e1e1e;
-      --border-red:  rgba(192,57,43,.35);
+      --border-red:  rgba(229,57,53,.45);
       --glow:        0 0 18px rgba(229,57,53,.45);
       --font-mono:   'Share Tech Mono', 'Courier Prime', monospace;
     }
@@ -976,7 +976,7 @@
 
       <div class="about-grid">
         <div class="about-text reveal">
-          <div class="classified-stamp">&#9632; Classified // Level Apprentice</div>
+          <div class="classified-stamp">&#9632; Classified // Level Junior</div>
           <p>
             Offensive security researcher with a <strong>deep focus on Red Team operations</strong>
             and adversary simulation.
@@ -1139,7 +1139,7 @@
       description: "Windows Server 2022 / Active Directory. Cadeia multi-estágio: NTLM hash leak 0-click (CVE-2025-24071), abuso de DACL, WinRM via Kerberos e LPE pelo agente Checkmk (CVE-2024-0670).",
       url: "src/writeups/nanocorp.html",
     },
-    // ── Adicione novos writeups abaixo ──
+
   ];
   </script>
 
@@ -1177,14 +1177,13 @@
 
   /* ─── BOOT SCREEN ─── */
   const bootLines = [
-    "BIOS v4.2.1 — Initializing secure subsystems...",
     "[ OK ] Cryptographic module loaded",
     "[ OK ] Network interface: STEALTH mode",
     "[ OK ] OPSEC layer activated",
-    "[ .. ] Loading operator profile...",
+    "[ ... ] Loading operator profile...",
     "[ OK ] Profile found: REL3ASE",
-    "[ OK ] Clearance level: III — UNRESTRICTED",
-    "[ .. ] Establishing secure tunnel...",
+    "[ OK ] Clearance level: Student",
+    "[ ... ] Establishing secure tunnel...",
     "[ OK ] C2 channel active",
     "",
     "  ██████╗ ███████╗██╗     ██████╗  █████╗ ███████╗███████╗",
@@ -1218,7 +1217,7 @@
       bootTextEl.textContent += bootLines[i] + '\n';
       bootBar.style.width = ((i + 1) / bootLines.length * 100) + '%';
     }
-    await new Promise(r => setTimeout(r, 600));
+    await new Promise(r => setTimeout(r, 500));
     dismissBoot();
   }
   runBoot();
@@ -1297,10 +1296,10 @@
 
   /* ─── HERO TYPING SUBTITLE ─── */
   const subtitles = [
-    'Red Team Operator',
+    'Red Team',
     'Bug Hunter',
     'Vulnerability Researcher',
-    'APT Simulation Specialist',
+    'APT Simulation',
   ];
   const subEl = document.getElementById('hero-sub');
   let si = 0, ci = 0, deleting = false;
