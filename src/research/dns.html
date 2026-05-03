@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>DNS Research Notes // Rel3ase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Courier+Prime:wght@400;700&display=swap" rel="stylesheet"/>
+  <style>
+    :root {
+      --bg: #070707;
+      --bg-card: #101010;
+      --red: #c0392b;
+      --red-bright: #e53935;
+      --red-dim: #7f1c14;
+      --text: #d4d4d4;
+      --text-dim: #666;
+      --text-muted: #333;
+      --border: #1e1e1e;
+      --border-red: rgba(192,57,43,.35);
+      --glow: 0 0 18px rgba(229,57,53,.4);
+      --font: 'Share Tech Mono','Courier Prime',monospace;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      overflow-x: hidden;
+      line-height: 1.65;
+    }
+    ::selection { background: var(--red); color: #fff; }
+    a { color: var(--red-bright); text-decoration: none; transition: color .2s; }
+    a:hover { color: #fff; }
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent 0px, transparent 2px,
+        rgba(0,0,0,.05) 2px, rgba(0,0,0,.05) 4px
+      );
+      pointer-events: none;
+      z-index: 9990;
+    }
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--bg); }
+    ::-webkit-scrollbar-thumb { background: var(--red-dim); border-radius: 2px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--red); }
+
+    header {
+      position: sticky; top: 0;
+      z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: .8rem 2.5rem;
+      background: rgba(7,7,7,.94);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(12px);
+    }
+    .logo {
+      font-size: .85rem; letter-spacing: .15em;
+      color: var(--red-bright); text-transform: uppercase;
+      display: flex; align-items: center; gap: .5rem;
+    }
+    .logo-bracket { color: var(--text-muted); }
+    .logo-blink {
+      display: inline-block; width: 7px; height: 13px;
+      background: var(--red);
+      animation: blink .8s step-end infinite;
+      vertical-align: middle; margin-left: 2px;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+    .back-link {
+      font-size: .72rem; letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      display: flex; align-items: center; gap: .5rem;
+      transition: color .2s;
+    }
+    .back-link:hover { color: var(--red-bright); }
+    .back-link svg { width: 14px; height: 14px; fill: currentColor; }
+
+    .writeup-hero {
+      position: relative;
+      padding: 5rem 2.5rem 3.5rem;
+      border-bottom: 1px solid var(--border);
+      overflow: hidden;
+    }
+    .writeup-hero::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 60% 80% at 80% 50%, rgba(192,57,43,.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-inner { position: relative; max-width: 860px; margin: 0 auto; }
+    .hero-platform {
+      font-size: .65rem; letter-spacing: .3em;
+      text-transform: uppercase; color: var(--red);
+      margin-bottom: .8rem;
+      display: flex; align-items: center; gap: .7rem;
+    }
+    .hero-platform::before { content: ''; width: 20px; height: 1px; background: var(--red); }
+    .hero-title {
+      font-size: clamp(2rem, 5vw, 3.6rem);
+      color: #fff; line-height: 1.05;
+      letter-spacing: -.01em;
+      margin-bottom: 1.2rem;
+    }
+    .hero-title em { font-style: normal; color: var(--red-bright); }
+    .meta-row { display: flex; flex-wrap: wrap; gap: .6rem; margin-bottom: 1.8rem; }
+    .badge {
+      font-size: .62rem; padding: .28rem .65rem;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      letter-spacing: .12em; text-transform: uppercase;
+    }
+    .badge.focus { border-color: var(--red-dim); color: var(--red-bright); }
+    .hero-summary {
+      font-size: .9rem; color: var(--text-dim);
+      max-width: 680px; line-height: 1.75;
+      border-left: 2px solid var(--red-dim);
+      padding-left: 1rem;
+    }
+    .chain-bar {
+      max-width: 860px; margin: 2.5rem auto 0;
+      display: flex; flex-wrap: wrap;
+      align-items: center; gap: .4rem;
+    }
+    .chain-step {
+      font-size: .62rem; letter-spacing: .1em;
+      text-transform: uppercase;
+      padding: .3rem .75rem;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .chain-arrow { color: var(--red-dim); font-size: .7rem; }
+    .chain-step.active { border-color: var(--red-dim); color: var(--red-bright); }
+
+    .writeup-body {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 3.5rem 2.5rem 5rem;
+    }
+    .ws { margin-bottom: 3.5rem; }
+    .ws-header {
+      display: flex; align-items: center; gap: .8rem;
+      margin-bottom: 1.5rem;
+      padding-bottom: .8rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .ws-num {
+      font-size: .6rem; color: var(--red);
+      letter-spacing: .2em; opacity: .7;
+      min-width: 2ch;
+    }
+    .ws-title {
+      font-size: .7rem; letter-spacing: .25em;
+      text-transform: uppercase; color: var(--red);
+    }
+    .prose { font-size: .86rem; color: var(--text-dim); line-height: 1.85; }
+    .prose p { margin-bottom: 1rem; }
+    .prose strong { color: var(--text); }
+    .prose em { color: var(--red-bright); font-style: normal; }
+    .prose a { color: var(--red-bright); text-decoration: underline; text-underline-offset: 3px; }
+    .prose ul, .prose ol { padding-left: 1.2rem; margin-bottom: 1rem; }
+    .prose li { margin-bottom: .4rem; }
+    .prose li::marker { color: var(--red-dim); }
+    code {
+      background: #111;
+      border: 1px solid #1e1e1e;
+      padding: .1rem .38rem;
+      color: var(--red-bright);
+      font-family: var(--font);
+      font-size: .82em;
+    }
+    .code-block {
+      margin: 1.4rem 0;
+      border: 1px solid var(--border);
+      background: #050505;
+      overflow: hidden;
+    }
+    .code-label {
+      font-size: .6rem; letter-spacing: .2em;
+      text-transform: uppercase; color: var(--red-dim);
+      padding: .4rem .85rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(192,57,43,.04);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .copy-btn {
+      font-size: .58rem; letter-spacing: .12em;
+      color: var(--text-muted); background: none;
+      border: none; cursor: pointer;
+      font-family: var(--font);
+      transition: color .2s;
+      padding: 0;
+    }
+    .copy-btn:hover { color: var(--red-bright); }
+    pre {
+      padding: 1rem 1.1rem;
+      overflow-x: auto;
+      font-size: .78rem;
+      line-height: 1.65;
+      color: #c8c8c8;
+      white-space: pre;
+      tab-size: 2;
+    }
+    .table-wrap {
+      margin: 1.4rem 0;
+      border: 1px solid var(--border);
+      overflow-x: auto;
+      background: #050505;
+    }
+    table { width: 100%; border-collapse: collapse; min-width: 680px; }
+    th, td {
+      border-bottom: 1px solid var(--border);
+      padding: .65rem .75rem;
+      text-align: left;
+      font-size: .78rem;
+      vertical-align: top;
+    }
+    th {
+      color: var(--red);
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      background: rgba(192,57,43,.04);
+    }
+    td { color: var(--text-dim); }
+    tr:last-child td { border-bottom: 0; }
+    .callout {
+      border: 1px solid var(--border-red);
+      background: rgba(192,57,43,.05);
+      padding: 1rem 1.2rem;
+      margin: 1.4rem 0;
+      font-size: .82rem; color: var(--text-dim);
+      line-height: 1.75;
+    }
+    .callout strong { color: var(--text); }
+    .callout-icon {
+      color: var(--red); font-size: .65rem;
+      letter-spacing: .2em; text-transform: uppercase;
+      display: block; margin-bottom: .5rem;
+    }
+    .writeup-auth {
+      margin-top: 3rem;
+      padding-top: 1.8rem;
+      border-top: 1px solid var(--border);
+      display: flex; align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+    }
+    .auth-id { font-size: .75rem; color: var(--text-dim); }
+    .auth-id strong { color: var(--red-bright); }
+    .auth-links { display: flex; gap: 1.2rem; }
+    .auth-links a {
+      font-size: .68rem; letter-spacing: .1em;
+      text-transform: uppercase; color: var(--text-muted);
+      transition: color .2s;
+    }
+    .auth-links a:hover { color: var(--red-bright); }
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem 2.5rem;
+      text-align: center;
+    }
+    .footer-text {
+      font-size: .62rem; color: var(--text-muted);
+      letter-spacing: .1em;
+    }
+    .footer-text span { color: var(--red); }
+    @media (max-width: 640px) {
+      header { padding: .75rem 1.2rem; }
+      .writeup-hero { padding: 3.5rem 1.2rem 2.5rem; }
+      .writeup-body { padding: 2.5rem 1.2rem 4rem; }
+      .hero-title { font-size: 2rem; }
+      pre { font-size: .72rem; }
+      .auth-links { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="logo">
+      <span class="logo-bracket">[</span>REL3ASE<span class="logo-bracket">]</span>
+      <span class="logo-blink"></span>
+    </div>
+    <a class="back-link" href="../../index.html#portfolio">
+      <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg>
+      Back to Projects
+    </a>
+  </header>
+
+  <div class="writeup-hero">
+    <div class="hero-inner">
+      <div class="hero-platform">Network Research · DNS · Notes</div>
+      <h1 class="hero-title">DNS <em>Research Notes</em></h1>
+      <div class="meta-row">
+        <span class="badge focus">Networking</span>
+        <span class="badge">Packet Structure</span>
+        <span class="badge">DoH / DoT</span>
+        <span class="badge">AXFR</span>
+        <span class="badge">C2 Tunneling</span>
+      </div>
+      <p class="hero-summary">
+        Anotação sobre DNS em níveis: do conceito simples até resolução completa,
+        estrutura do pacote, registros, TTL, zonas, DNS reverso, resolvedores, DNS
+        criptografado, comandos <code>dig</code> e uso de DNS em C2/tunneling.
+      </p>
+      <div class="chain-bar">
+        <span class="chain-step active">Cache</span>
+        <span class="chain-arrow">→</span>
+        <span class="chain-step active">Resolver</span>
+        <span class="chain-arrow">→</span>
+        <span class="chain-step active">Root</span>
+        <span class="chain-arrow">→</span>
+        <span class="chain-step active">TLD</span>
+        <span class="chain-arrow">→</span>
+        <span class="chain-step active">Authoritative</span>
+        <span class="chain-arrow">→</span>
+        <span class="chain-step active">Answer</span>
+      </div>
+    </div>
+  </div>
+
+  <main class="writeup-body">
+    <section class="ws">
+      <div class="ws-header">
+        <span class="ws-num">01</span>
+        <span class="ws-title">Nível 0 — O que é DNS em termos simples?</span>
+      </div>
+      <div class="prose">
+        <p><strong>DNS (Sistema de Nomes de Domínio)</strong> é como a lista telefônica gigante da internet. Ele ajuda seu navegador a encontrar o endereço real (IP) do site que você digita.</p>
+        <p>Imagine pedir ao seu navegador, seu assistente útil, para buscar uma página da web. Ele verifica um enorme diretório da Internet para encontrar o endereço exato desse site e depois o carrega.</p>
+        <p>Este processo de pesquisa geralmente segue um de dois caminhos:</p>
+        <ul>
+          <li><strong>Verificação rápida do cache</strong> — se você visitou o site recentemente, o navegador recupera o IP do cache, fazendo com que a página carregue quase instantaneamente.</li>
+          <li><strong>Pesquisa completa de DNS</strong> — se não houver dados armazenados em cache, o navegador solicita a um resolvedor DNS que encontre o endereço IP consultando servidores DNS na web.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="ws">
+      <div class="ws-header">
+        <span class="ws-num">02</span>
+        <span class="ws-title">Estrutura do pacote DNS</span>
+      </div>
+      <div class="prose">
+        <p>Um pacote DNS é composto basicamente por um cabeçalho fixo e quatro seções principais: perguntas, respostas, autoridade e adicional.</p>
+        <p><strong>1. Cabeçalho (Header) — 12 bytes</strong></p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Campo</th><th>Tamanho</th><th>Descrição</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>ID</strong></td><td>16 bits</td><td>Identificador da consulta, usado para casar resposta.</td></tr>
+            <tr><td><strong>Flags</strong></td><td>16 bits</td><td>Flags que indicam tipo e opções da consulta.</td></tr>
+            <tr><td>QR</td><td>1 bit</td><td>Query (0) ou Response (1).</td></tr>
+            <tr><td>Opcode</td><td>4 bits</td><td>Tipo de operação: normal=0, inversa=1, etc.</td></tr>
+            <tr><td>AA</td><td>1 bit</td><td>Autoritativo: servidor autoritário responde.</td></tr>
+            <tr><td>TC</td><td>1 bit</td><td>Truncado: setado se o pacote for maior que UDP.</td></tr>
+            <tr><td>RD</td><td>1 bit</td><td>Recursão desejada.</td></tr>
+            <tr><td>RA</td><td>1 bit</td><td>Recursão disponível.</td></tr>
+            <tr><td>Z</td><td>3 bits</td><td>Reservado, sempre 0.</td></tr>
+            <tr><td>RCODE</td><td>4 bits</td><td>Código de resposta: 0=sucesso, &gt;0 erro.</td></tr>
+            <tr><td><strong>QDCOUNT</strong></td><td>16 bits</td><td>Número de entradas na seção de perguntas.</td></tr>
+            <tr><td><strong>ANCOUNT</strong></td><td>16 bits</td><td>Número de registros na seção de respostas.</td></tr>
+            <tr><td><strong>NSCOUNT</strong></td><td>16 bits</td><td>Número de registros na seção de autoridade.</td></tr>
+            <tr><td><strong>ARCOUNT</strong></td><td>16 bits</td><td>Número de registros na seção adicional.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose">
+        <p><strong>2. Seção de Perguntas (Question Section)</strong></p>
+        <ul>
+          <li><strong>QName:</strong> nome do domínio consultado, codificado em labels, exemplo: <code>3www6google3com0</code>.</li>
+          <li><strong>QType:</strong> tipo de consulta, como A, MX, NS.</li>
+          <li><strong>QClass:</strong> classe, normalmente IN para internet.</li>
+        </ul>
+        <p><strong>3. Seção de Resposta (Answer Section)</strong></p>
+        <p>Registros que respondem a pergunta feita. Cada registro inclui <strong>Name</strong>, <strong>Type</strong>, <strong>Class</strong>, <strong>TTL</strong>, <strong>Data length</strong> e <strong>RDATA</strong>.</p>
+        <p><strong>4. Seção de Autoridade (Authority Section)</strong> — contém registros que indicam servidores DNS autoritativos para o domínio.</p>
+        <p><strong>5. Seção Adicional (Additional Section)</strong> — informações adicionais úteis, como IPs dos servidores autoritativos para agilizar consultas.</p>
+      </div>
+      <div class="callout">
+        <span class="callout-icon">// Exemplo simplificado</span>
+        Se você fizer uma consulta para <code>www.example.com</code> tipo A: cabeçalho com ID e flags, pergunta para <code>www.example.com</code>, resposta com IP na seção Answer, e autoridade/adicional apontando para servidores DNS e IPs deles, se houver.
+      </div>
+    </section>
+
+    <section class="ws">
+      <div class="ws-header">
+        <span class="ws-num">03</span>
+        <span class="ws-title">Nível 1 — Fluxo completo da resolução</span>
+      </div>
+      <div class="prose">
+        <p>Se o navegador encontrar o endereço IP no cache, no navegador ou no sistema operacional, ele o usará imediatamente.</p>
+        <p>Caso contrário, ele alcança um <strong>resolvedor de DNS</strong>, como o DNS do Google ou o DNS do seu ISP, para fazer a pesquisa:</p>
+        <ol>
+          <li>O resolvedor entra em contato com um <strong>servidor raiz</strong>. Para <code>www.example.com</code>, o servidor raiz aponta para o TLD <code>.com</code>.</li>
+          <li>O <strong>servidor TLD .com</strong> diz ao resolvedor qual servidor autoritário sabe sobre <code>example.com</code>.</li>
+          <li>O resolvedor consulta esse <strong>servidor autoritário</strong>, que retorna o endereço IP final.</li>
+          <li>O resolvedor envia esse IP de volta ao navegador, que então busca o site.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="ws">
+      <div class="ws-header">
+        <span class="ws-num">04</span>
+        <span class="ws-title">Registros DNS, TTL, zonas e rDNS</span>
+      </div>
+      <div class="prose">
+        <p>Cada domínio é apoiado por <strong>registros DNS</strong>, armazenados em servidores confiáveis. Esses registros controlam como um domínio funciona.</p>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Registro</th><th>Uso</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>A</td><td>Mapeia um domínio para um endereço IPv4.</td></tr>
+            <tr><td>AAAA</td><td>Mapeia um domínio para um endereço IPv6.</td></tr>
+            <tr><td>CNAME</td><td>Aponta um domínio para outro domínio, como alias.</td></tr>
+            <tr><td>MX</td><td>Informações do servidor de e-mail para entrega de e-mail.</td></tr>
+            <tr><td>NS</td><td>Aponta para os servidores de nomes autorizados do domínio.</td></tr>
+            <tr><td>TXT</td><td>Usado para verificação de domínio, SPF, etc.</td></tr>
+            <tr><td>SOA</td><td>Informações administrativas sobre a zona DNS.</td></tr>
+            <tr><td>CAA</td><td>Especifica quais CAs podem emitir certificados SSL.</td></tr>
+            <tr><td>PTR</td><td>Habilita DNS reverso: IP para domínio.</td></tr>
+            <tr><td>SRV / NAPTR</td><td>Usado para VoIP e roteamento avançado de serviços.</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="prose">
+        <p><strong>TTL — Time to Live</strong> define por quanto tempo um registro DNS pode ser armazenado em cache antes de precisar ser atualizado. Se você atualizar um registro A para apontar o domínio para um novo host, pode definir um TTL baixo, como <code>300 segundos</code>, temporariamente para que as alterações propaguem mais rápido.</p>
+        <p><strong>Zonas e arquivos de zona</strong> guardam todos os registros DNS associados ao domínio. Ao atualizar registros no painel do provedor, como A ou CNAME, você modifica esse arquivo. As alterações entram em vigor quando o TTL expira e novas consultas são feitas.</p>
+        <p><strong>DNS reverso (rDNS)</strong> mapeia endereços IP de volta para nomes de domínio. Ele ajuda em filtragem de spam por e-mail, legibilidade de logs, auditoria, diagnóstico e construção de confiança com serviços de terceiros.</p>
+      </div>
+    </section>
+
+    <section class="ws">
+      <div class="ws-header">
+        <span class="ws-num">05</span>
+        <span class="ws-title">Tipos de resolvedores DNS</span>
+      </div>
+      <div class="prose">
+        <ol>
+          <li><strong>Resolver toco:</strong> vive no seu dispositivo, navegador ou SO, e encaminha consultas para um resolvedor completo.</li>
+          <li><strong>Recursive Resolver:</strong> faz a resolução completa consultando vários servidores upstream. Exemplos: Google DNS (<code>8.8.8.8</code>), Cloudflare (<code>1.1.1.1</code>) e resolvedores de ISP.</li>
+          <li><strong>Resolvedor Iterativo:</strong> usado entre servidores DNS. Responde com: "Não sei, mas experimente este servidor".</li>
+          <li><strong>Resolvedor de cache:</strong> armazena registros resolvidos anteriormente, reduz pesquisas repetidas e honra o TTL.</li>
+          <li><strong>Resolvedor Autoritário:</strong> fonte final da verdade; hospeda e serve registros DNS reais para um domínio.</li>
+        </ol>
+      </div>
+    </section>
+
+    <section class="ws">
+      <div class="ws-header">
+        <span class="ws-num">06</span>
+        <span class="ws-title">DNS criptografado — DoH e DoT</span>
+      </div>
+      <div class="prose">
+        <p>As consultas DNS são <strong>não criptografadas por padrão</strong>, o que as torna vulneráveis a monitoramento por ISPs, governos e intermediários, além de sequestro ou spoofing por atacantes.</p>
+        <p><strong>DNS sobre HTTPS (DoH)</strong></p>
+        <ul>
+          <li>Criptografa consultas DNS usando HTTPS padrão, porta 443.</li>
+          <li>É mais difícil de bloquear ou interceptar.</li>
+          <li>É usado por navegadores como Chrome e Firefox.</li>
+          <li>É suportado por Cloudflare e Google DNS.</li>
+        </ul>
+        <p><strong>DNS sobre TLS (DoT)</strong></p>
+        <ul>
+          <li>Criptografa consultas DNS por TLS, porta 853.</li>
+          <li>Funciona no nível do sistema operacional ou roteador.</li>
+          <li>É suportado por Android 9+, distros Linux e provedores de DNS de privacidade.</li>
+        </ul>
+        <p>Ambos melhoram a privacidade e a integridade das comunicações DNS.</p>
+      </div>
+      <div class="callout">
+        <span class="callout-icon">// DoH — DNS encrypted</span>
+        DoH coloca consultas DNS dentro de uma conexão HTTPS na porta 443, misturando-as com tráfego normal da web. Isso dificulta monitoramento por ISPs, bloqueios seletivos por firewalls e spoofing de DNS.
+      </div>
+    </section>
+
+    <section class="ws">
+      <div class="ws-header">
+        <span class="ws-num">07</span>
+        <span class="ws-title">tcpdump, transferência de zona e AXFR</span>
+      </div>
+      <div class="prose">
+        <p>Para observar consultas DNS tradicionais na rede:</p>
+      </div>
+      <div class="code-block">
+        <div class="code-label"><span>tcpdump — DNS porta 53</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre>sudo tcpdump -i any port 53</pre>
+      </div>
+      <div class="prose">
+        <p><strong>Transferência de Zona DNS (Zone Transfer)</strong> é o mecanismo pelo qual um servidor DNS secundário obtém uma cópia completa dos registros DNS de um servidor primário.</p>
+        <ul>
+          <li><strong>Para que serve:</strong> manter vários servidores DNS com as mesmas informações, garantindo redundância, disponibilidade e sincronização.</li>
+          <li><strong>Uso legítimo:</strong> replicação oficial e autorizada entre servidores DNS da mesma organização.</li>
+          <li><strong>Uso malicioso:</strong> atacantes podem tentar obter AXFR sem autorização para enumerar registros DNS, subdomínios e detalhes de rede.</li>
+        </ul>
+        <p><strong>AXFR</strong> é o tipo de requisição DNS usado para pedir a transferência completa da zona de um domínio de um servidor DNS primário para outro. Em pentests, é usado para testar se um servidor está bloqueando corretamente transferências não autorizadas.</p>
+      </div>
+    </section>
+
+    <section class="ws">
+      <div class="ws-header">
+        <span class="ws-num">08</span>
+        <span class="ws-title">Comandos básicos dig</span>
+      </div>
+      <div class="code-block">
+        <div class="code-label"><span>consulta simples de registro A</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre>dig exemplo.com A</pre>
+      </div>
+      <div class="code-block">
+        <div class="code-label"><span>outros tipos de registros</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre>dig exemplo.com MX
+dig exemplo.com NS
+dig exemplo.com TXT
+dig exemplo.com CAA
+dig exemplo.com AAAA
+dig exemplo.com PTR</pre>
+      </div>
+      <div class="code-block">
+        <div class="code-label"><span>consulta DNS reverso</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre>dig -x 8.8.8.8</pre>
+      </div>
+      <div class="code-block">
+        <div class="code-label"><span>consultar servidor específico</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre>dig @8.8.8.8 exemplo.com</pre>
+      </div>
+      <div class="code-block">
+        <div class="code-label"><span>consulta com trace</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre>dig +trace exemplo.com</pre>
+      </div>
+      <div class="code-block">
+        <div class="code-label"><span>tentar transferência de zona</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre>dig @ns1.exemplo.com exemplo.com AXFR</pre>
+      </div>
+      <div class="code-block">
+        <div class="code-label"><span>resultado limpo e timeout</span><button class="copy-btn" onclick="copyCode(this)">copy</button></div>
+        <pre>dig exemplo.com +short
+dig exemplo.com +time=5</pre>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Parâmetro</th><th>Descrição</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>@servidor</code></td><td>Define o servidor DNS que receberá a consulta.</td></tr>
+            <tr><td><code>+short</code></td><td>Resposta simplificada, só os dados essenciais.</td></tr>
+            <tr><td><code>+trace</code></td><td>Traça passo a passo a resolução DNS, da raiz ao domínio.</td></tr>
+            <tr><td><code>+time=N</code></td><td>Define timeout em segundos para a consulta.</td></tr>
+            <tr><td><code>-x</code></td><td>Consulta reversa: IP para nome.</td></tr>
+            <tr><td><code>AXFR</code></td><td>Transferência de zona completa, quando permitida.</td></tr>
+            <tr><td><code>ANY</code></td><td>Pede todos os registros disponíveis para o domínio.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="ws">
+      <div class="ws-header">
+        <span class="ws-num">09</span>
+        <span class="ws-title">DNS em C2, stager e tunneling</span>
+      </div>
+      <div class="prose">
+        <p>DNS é um dos protocolos mais antigos e essenciais da internet. Quase todo ambiente permite consultas DNS, por isso ele pode ser abusado em comunicações de Command & Control (C2).</p>
+        <ul>
+          <li><strong>Baixa detecção:</strong> firewalls raramente bloqueiam DNS.</li>
+          <li><strong>Tráfego normal:</strong> consultas DNS parecem legítimas, então tráfego malicioso pode tentar se misturar.</li>
+          <li><strong>Infraestrutura simples:</strong> o atacante pode controlar um domínio e registrar respostas DNS sem manter um servidor web inteiro.</li>
+        </ul>
+        <p><strong>Stager + DNS</strong></p>
+        <p>Stager é o primeiro payload. Ele geralmente é pequeno e tem o objetivo de comunicar com o C2 e baixar a carga principal em uma cadeia multi-stager.</p>
+        <ul>
+          <li>Fazer uma consulta DNS para um domínio controlado pelo atacante.</li>
+          <li>Receber instruções dentro de uma resposta DNS, como TXT record.</li>
+          <li>Baixar o próximo estágio por HTTP, SMB ou continuar tudo via DNS.</li>
+        </ul>
+      </div>
+      <div class="callout">
+        <span class="callout-icon">// Exemplo didático</span>
+        Uma vítima infectada faz uma query <code>a1b2c3.attacker.com</code>. O servidor DNS do atacante responde com um TXT record contendo instruções ou conteúdo codificado.
+      </div>
+      <div class="prose">
+        <p><strong>DNS Tunneling</strong> permite comunicação bidirecional via DNS.</p>
+        <ul>
+          <li><strong>Exfiltração:</strong> dados sensíveis podem ser enviados em pedaços, codificados no nome da consulta, como <code>senha123.attacker.com</code>.</li>
+          <li><strong>Comando:</strong> o servidor controlado responde com novos comandos.</li>
+          <li><strong>Ferramentas comuns:</strong> <code>iodine</code>, <code>dnscat2</code>, <code>dnstunnel</code>.</li>
+        </ul>
+        <p><strong>Importante:</strong> isso é usado em Red Team para simular um atacante persistente e testar a capacidade de detecção da empresa.</p>
+      </div>
+    </section>
+
+    <section class="ws">
+      <div class="ws-header">
+        <span class="ws-num">10</span>
+        <span class="ws-title">Referências</span>
+      </div>
+      <div class="prose">
+        <ul>
+          <li><a href="https://zeltser.com/c2-dns-tunneling/" target="_blank" rel="noopener">zeltser.com/c2-dns-tunneling</a></li>
+          <li><a href="https://www.cobaltstrike.com/blog/dns-command-and-control-added-to-cobalt-strike" target="_blank" rel="noopener">cobaltstrike.com/blog/dns-command-and-control-added-to-cobalt-strike</a></li>
+          <li><a href="https://medium.com/@paritoshblogs/detecting-dns-tunneling-how-attackers-use-dns-for-c2-exfiltration-3e111ff24996" target="_blank" rel="noopener">medium.com/@paritoshblogs/detecting-dns-tunneling</a></li>
+          <li><a href="https://blogs.infoblox.com/security/dns-a-small-but-effective-c2-system/" target="_blank" rel="noopener">blogs.infoblox.com/security/dns-a-small-but-effective-c2-system</a></li>
+          <li><a href="https://www.infosecinstitute.com/resources/hacking/tutorial-how-to-exfiltrate-or-execute-files-in-compromised-machines-with-dns/" target="_blank" rel="noopener">infosecinstitute.com/resources/hacking/dns</a></li>
+          <li><a href="https://www.paloaltonetworks.com/cyberpedia/what-is-dns-tunneling" target="_blank" rel="noopener">paloaltonetworks.com/cyberpedia/what-is-dns-tunneling</a></li>
+          <li><a href="https://cloud.google.com/blog/topics/threat-intelligence/defining-cobalt-strike-components" target="_blank" rel="noopener">cloud.google.com/blog/topics/threat-intelligence/defining-cobalt-strike-components</a></li>
+        </ul>
+      </div>
+    </section>
+
+    <div class="writeup-auth">
+      <div class="auth-id">
+        <strong>@Rel3ase</strong> — Offensive Security Researcher
+      </div>
+      <div class="auth-links">
+        <a href="https://github.com/releaseown" target="_blank" rel="noopener">GitHub</a>
+        <a href="https://www.linkedin.com/in/rianjunior/" target="_blank" rel="noopener">LinkedIn</a>
+        <a href="https://x.com/S1lentNightSf" target="_blank" rel="noopener">X</a>
+        <a href="https://app.hackthebox.com/users/2282037" target="_blank" rel="noopener">HTB</a>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p class="footer-text">
+      &copy; <span id="yr"></span> <span>REL3ASE</span> — All Rights Reserved.
+      &nbsp;|&nbsp; research/dns.html
+    </p>
+  </footer>
+
+  <script>
+    document.getElementById('yr').textContent = new Date().getFullYear();
+
+    function copyCode(btn) {
+      const pre = btn.closest('.code-block').querySelector('pre');
+      const text = pre.innerText || pre.textContent;
+      navigator.clipboard.writeText(text).then(() => {
+        btn.textContent = 'copied!';
+        setTimeout(() => btn.textContent = 'copy', 1800);
+      });
+    }
+
+    const obs = new IntersectionObserver(entries => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.style.opacity = '1';
+          e.target.style.transform = 'translateY(0)';
+          obs.unobserve(e.target);
+        }
+      });
+    }, { threshold: .1 });
+
+    document.querySelectorAll('.ws').forEach(el => {
+      el.style.opacity = '0';
+      el.style.transform = 'translateY(18px)';
+      el.style.transition = 'opacity .45s ease, transform .45s ease';
+      obs.observe(el);
+    });
+  </script>
+</body>
+</html>
