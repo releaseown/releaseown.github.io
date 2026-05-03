@@ -1119,6 +1119,16 @@
       tags: ["CVE", "RCE", "n8n", "Exploit Dev", "PoC"],
       url: "https://github.com/releaseown/analysis-and-poc-n8n-CVE-2025-68613",
     },
+    {
+      id: 3,
+      label: "Network Research",
+      title: "DNS — Resolução, Pacotes, DoH, AXFR e Tunneling",
+      description:
+        "Anotação técnica sobre DNS: fluxo de resolução, estrutura de pacotes, tipos de registros, TTL, zonas, rDNS, DoH/DoT, tcpdump, dig, AXFR e uso de DNS em C2/tunneling.",
+      tags: ["DNS", "Networking", "DoH", "AXFR", "C2"],
+      url: "src/research/dns.html",
+      linkLabel: "Read Research",
+    },
   ];
   </script>
 
@@ -1355,9 +1365,17 @@
       <div class="card-title">${p.title}</div>
       <p class="card-desc">${p.description}</p>
       <div class="card-tags">${p.tags.map(t=>`<span class="card-tag">${t}</span>`).join('')}</div>
-      <a class="card-link" href="${p.url}" target="_blank" rel="noopener">
-        View Repository &rsaquo;
+      <a class="card-link" href="${p.url}" ${p.url.startsWith('http') ? 'target="_blank" rel="noopener"' : ''}>
+        ${p.linkLabel || 'View Repository'} &rsaquo;
       </a>`;
+    card.addEventListener('click', () => {
+      if (p.url.startsWith('http')) {
+        window.open(p.url, '_blank', 'noopener');
+      } else {
+        window.location.href = p.url;
+      }
+    });
+    card.querySelector('.card-link').addEventListener('click', e => e.stopPropagation());
     pgrid.appendChild(card);
     observer.observe(card);
   });
